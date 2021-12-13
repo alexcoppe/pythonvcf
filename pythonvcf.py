@@ -29,14 +29,35 @@ class Variant:
         self.info = splitted_line[7]
         self.format = splitted_line[8]
 
-        sample_postions = range(9,number_of_columns)
-        self.samples = [splitted_line[i] for i in sample_postions]
+        sample_positions = range(9,number_of_columns)
+        self.samples = [splitted_line[i] for i in sample_positions]
+
+        self.samples_stats = {}
+
+        self.__build_samples_stats()
+
 
     def __str__(self):
         return("Chromosome: {}\nPosition: {}".format(self.chromosome, self.position))
 
     def __repr__(self):
         return("Chromosome: {}\nPosition: {}".format(self.chromosome, self.position))
+
+    def __build_samples_stats(self):
+        format_keys = self.format.split(":")
+        sample_number = 0
+        for sample in self.samples:
+            n = 0
+            self.samples_stats[sample_number] = {}
+            splitted_sample = sample.split(":")
+            if len(format_keys) != len(splitted_sample):
+                sys.exit("This format {} and this sample {} have a different number of variables".format(self.format, sample))
+            for k in format_keys:
+                self.samples_stats[sample_number][k] = splitted_sample[n]
+                n += 1
+            sample_number += 1
+
+
 
 def main():
     parser = argparse.ArgumentParser(description="Parse a VCF file")
@@ -58,7 +79,7 @@ def main():
                 line = line.decode('UTF-8')
             if line[0] != '#':
                 variant = Variant(line)
-                print(variant)
+                print(variant.samples_stats)
 
 if __name__ == "__main__":
     main()
