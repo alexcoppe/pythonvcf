@@ -33,8 +33,10 @@ class Variant:
         self.samples = [splitted_line[i] for i in sample_positions]
 
         self.samples_stats = {}
-
         self.__build_samples_stats()
+
+        self.info_dict = {}
+        self.__build_info_dict()
 
 
     def __str__(self):
@@ -58,6 +60,33 @@ class Variant:
             sample_number += 1
 
 
+    def get_genotype_field(self, sample, field):
+        """
+        Parameters
+        ----------
+        sample : int
+            The number of the sample
+        field : the field to be returned (example DP)
+
+        Returns
+        -------
+        str
+            the asked field
+        """
+        try:
+            self.samples_stats[sample - 1][field]
+        except:
+            return None
+        return self.samples_stats[sample - 1][field]
+
+
+    def __build_info_dict(self):
+        splitted_info = self.info.split(";")
+        for sub_info in splitted_info:
+            splitted_sub_info = sub_info.split("=")
+            if len(splitted_sub_info) == 2:
+                self.info_dict[splitted_sub_info[0]] = splitted_sub_info[1]
+
 
 def main():
     parser = argparse.ArgumentParser(description="Parse a VCF file")
@@ -79,7 +108,10 @@ def main():
                 line = line.decode('UTF-8')
             if line[0] != '#':
                 variant = Variant(line)
-                print(variant.samples_stats)
+                #print(variant.samples_stats)
+                #print(variant.get_genotype_field(2,"DP"))
+                print(variant.info_dict.get("gnomAD_genome_ALL"))
+                print(variant.info_dict.get("ANN"))
 
 if __name__ == "__main__":
     main()
