@@ -38,6 +38,22 @@ class Variant:
         self.info_dict = {}
         self.__build_info_dict()
 
+        # ClinVar aggregates information about genomic variation and its relationship to human health.
+        self.clnsig = None
+        # FATHMM Functional analysis through hidden markov model HMM
+        # D: Deleterious T: Tolerated lower values are more deleterious
+        self.fathmm_pred = None
+        # If a FATHMM_score is <=-1.5 (or rankscore <=0.81415) the corresponding non-synonymous SNP is predicted as "D(AMAGING)"; otherwise it is predicted as "T(OLERATED)"
+        self.fathmm_score = None
+        # https://fathmm.biocompute.org.uk/fathmmMKL.htm
+        # Predictions are given as p-values in the range [0, 1]: values above 0.5 are predicted 
+        # to be deleterious, while those below 0.5 are predicted to be neutral or benign. 
+        # P-values close to the extremes (0 or 1) are the highest-confidence predictions that yield the highest accuracy.
+        self.fathmm_mkl_coding_score = None
+        self.fathmm_mkl_coding_pred = None
+
+        self._get_variant_effects()
+
 
     def __str__(self):
         return("Chromosome: {}\nPosition: {}".format(self.chromosome, self.position))
@@ -87,6 +103,28 @@ class Variant:
             if len(splitted_sub_info) == 2:
                 self.info_dict[splitted_sub_info[0]] = splitted_sub_info[1]
 
+    def _get_variant_effects(self):
+        """
+        Description 
+        -----------
+            Populates the Variant with prediction of effects
+            Available prediction softwares: FATHMM, ClinVar (CLNSIG)
+        """
+        # FATHMM Functional analysis through hidden markov model HMM
+        # D: Deleterious T: Tolerated lower values are more deleterious
+        self.fathmm_pred = self.info_dict.get("FATHMM_pred")
+        # If a FATHMM_score is <=-1.5 (or rankscore <=0.81415) the corresponding non-synonymous SNP is predicted as "D(AMAGING)"; otherwise it is predicted as "T(OLERATED)"
+        self.fathmm_score = self.info_dict.get("FATHMM_score")
+        # https://fathmm.biocompute.org.uk/fathmmMKL.htm
+        # Predictions are given as p-values in the range [0, 1]: values above 0.5 are predicted 
+        # to be deleterious, while those below 0.5 are predicted to be neutral or benign. 
+        # P-values close to the extremes (0 or 1) are the highest-confidence predictions that yield the highest accuracy.
+        self.fathmm_mkl_coding_score = self.info_dict.get("fathmm-MKL_coding_score")
+        self.fathmm_mkl_coding_pred = self.info_dict.get("fathmm-MKL_coding_pred")
+        #print(self.fathmm_mkl_coding_pred)
+        # ClinVar aggregates information about genomic variation and its relationship to human health.
+        self.clnsig = self.info_dict.get("CLNSIG")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Parse a VCF file")
@@ -108,10 +146,19 @@ def main():
                 line = line.decode('UTF-8')
             if line[0] != '#':
                 variant = Variant(line)
+                print(variant.fathmm_score, variant.fathmm_pred, variant.fathmm_mkl_coding_score)
+                #print(variant.fathmm_pred)
+                #print(variant.fathmm_score)
+
                 #print(variant.samples_stats)
                 #print(variant.get_genotype_field(2,"DP"))
-                print(variant.info_dict.get("gnomAD_genome_ALL"))
-                print(variant.info_dict.get("ANN"))
+                #print(variant.info_dict.get("gnomAD_genome_ALL"))
+                #print(variant.info_dict.get("ANN"))
+                #print(variant.samples_stats)
+                #print(variant.samples_stats[0])
+                #print(variant.samples_stats[1].get("AD"))
+
+                #print(variant.info_dict.keys())
 
 if __name__ == "__main__":
     main()
