@@ -54,6 +54,10 @@ class Variant:
 
         self._get_variant_effects()
 
+        self.gnomad_genome_all = None
+
+        self._get_variant_gnomad_stats()
+
 
     def __str__(self):
         return("Chromosome: {}\nPosition: {}".format(self.chromosome, self.position))
@@ -125,6 +129,12 @@ class Variant:
         # ClinVar aggregates information about genomic variation and its relationship to human health.
         self.clnsig = self.info_dict.get("CLNSIG")
 
+    def _get_variant_gnomad_stats(self):
+        if self.info_dict.get("gnomAD_genome_ALL") == ".":
+            self.gnomad_genome_all = 0
+        else:
+            self.gnomad_genome_all = float(self.info_dict.get("gnomAD_genome_ALL"))
+
 
 def main():
     parser = argparse.ArgumentParser(description="Parse a VCF file")
@@ -146,19 +156,8 @@ def main():
                 line = line.decode('UTF-8')
             if line[0] != '#':
                 variant = Variant(line)
-                print(variant.fathmm_score, variant.fathmm_pred, variant.fathmm_mkl_coding_score)
-                #print(variant.fathmm_pred)
-                #print(variant.fathmm_score)
-
-                #print(variant.samples_stats)
-                #print(variant.get_genotype_field(2,"DP"))
-                #print(variant.info_dict.get("gnomAD_genome_ALL"))
-                #print(variant.info_dict.get("ANN"))
-                #print(variant.samples_stats)
-                #print(variant.samples_stats[0])
-                #print(variant.samples_stats[1].get("AD"))
-
-                #print(variant.info_dict.keys())
+                #print(variant.fathmm_score, variant.fathmm_pred, variant.fathmm_mkl_coding_score)
+                print(variant.gnomad_genome_all)
 
 if __name__ == "__main__":
     main()
