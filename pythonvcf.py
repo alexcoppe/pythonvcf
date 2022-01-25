@@ -5,6 +5,27 @@ import gzip
 import os
 import sys
 
+class Sneff_transcript:
+    def __init__(self, ann):
+        splitted_ann = ann.split("|")
+        self.allele = splitted_ann[0]
+        self.effect = splitted_ann[1]
+        self.impact = splitted_ann[2]
+        self.gene = splitted_ann[3]
+        self.geneid = splitted_ann[4]
+        self.feature = splitted_ann[5]
+        self.featureid = splitted_ann[6]
+        self.biotype = splitted_ann[7]
+        self.rank = splitted_ann[8]
+        self.hgvs_c = splitted_ann[9]
+        self.hgvs_p = splitted_ann[10]
+        self.cdna_pos = splitted_ann[11]
+        self.cdna_len = splitted_ann[12]
+        self.cds_pos = splitted_ann[13]
+        self.cds_len = splitted_ann[14]
+        self.aa_pos = splitted_ann[15]
+
+
 class Variant:
     def __init__(self, vcf_line):
         splitted_line = vcf_line.split()
@@ -43,7 +64,7 @@ class Variant:
         # FATHMM Functional analysis through hidden markov model HMM
         # D: Deleterious T: Tolerated lower values are more deleterious
         self.fathmm_pred = None
-        # If a FATHMM_score is <=-1.5 (or rankscore <=0.81415) the corresponding non-synonymous SNP is predicted as "D(AMAGING)"; otherwise it is predicted as "T(OLERATED)"
+        # If a FATHMM_score is <=0.5 (or rankscore <=0.81415) the corresponding non-synonymous SNP is predicted as "D(AMAGING)"; otherwise it is predicted as "T(OLERATED)"
         self.fathmm_score = None
         # https://fathmm.biocompute.org.uk/fathmmMKL.htm
         # Predictions are given as p-values in the range [0, 1]: values above 0.5 are predicted 
@@ -57,6 +78,9 @@ class Variant:
         self.gnomad_genome_all = None
 
         self._get_variant_gnomad_stats()
+
+        self.snpeff_transcipt_list = self._get_snpeff_transcripts(self.info_dict.get("ANN"))
+        print(self.snpeff_transcipt_list)
 
 
     def __str__(self):
@@ -79,6 +103,14 @@ class Variant:
                 n += 1
             sample_number += 1
 
+    def _get_snpeff_transcripts(self, ANN_field):
+        snpeff_transcipt_list = []
+        transcripts = ANN_field.split(",")
+        for transcript in transcripts:
+            snpeff_transcipt = Sneff_transcript(transcript)
+            snpeff_transcipt_list.append(snpeff_transcipt)
+        return snpeff_transcipt_list
+        
 
     def get_genotype_field(self, sample, field):
         """
@@ -156,8 +188,9 @@ def main():
                 line = line.decode('UTF-8')
             if line[0] != '#':
                 variant = Variant(line)
-                #print(variant.fathmm_score, variant.fathmm_pred, variant.fathmm_mkl_coding_score)
-                print(variant.gnomad_genome_all)
+                #print(variant.fathmm_score, variant.fathmm_pred, variant.fathmm_mkl_coding_score, variant.clnsig)
+                #print(variant.gnomad_genome_all)
+                #print(variant.info_dict.get("ANN"))
 
 if __name__ == "__main__":
     main()
