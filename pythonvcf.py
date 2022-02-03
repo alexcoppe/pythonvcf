@@ -79,6 +79,16 @@ class Variant:
         self.fathmm_mkl_coding_score = None
         self.fathmm_mkl_coding_pred = None
 
+        # MutationAssessor score predicts the functional impact of amino-acid substitutions
+        # in proteins based on evolutionary conservation of the affected amino acid in protein 
+        # homologs. The score ranges from -5.2 to 6.5.
+        # N = neutral
+        # L = low
+        # M = medium
+        # H = high
+        self.mutationassessor_score = None
+        self.mutationassessor_pred = None
+
         self._get_variant_effects()
 
         self.gnomad_genome_all = None
@@ -86,7 +96,7 @@ class Variant:
         self._get_variant_gnomad_stats()
 
         self.snpeff_transcipt_list = self._get_snpeff_transcripts(self.info_dict.get("ANN"))
-        print(self.snpeff_transcipt_list)
+        #print(self.snpeff_transcipt_list)
 
 
     def __str__(self):
@@ -165,6 +175,16 @@ class Variant:
         self.fathmm_mkl_coding_pred = self.info_dict.get("fathmm-MKL_coding_pred")
         #print(self.fathmm_mkl_coding_pred)
         # ClinVar aggregates information about genomic variation and its relationship to human health.
+        # MutationAssessor score predicts the functional impact of amino-acid substitutions
+        # in proteins based on evolutionary conservation of the affected amino acid in protein 
+        # homologs. The score ranges from -5.2 to 6.5.
+        # N = neutral
+        # L = low
+        # M = medium
+        # H = high
+        self.mutationassessor_score = self.info_dict.get("MutationAssessor_score")
+        self.mutationassessor_pred = self.info_dict.get("MutationAssessor_pred")
+
         self.clnsig = self.info_dict.get("CLNSIG")
 
     def _get_variant_gnomad_stats(self):
@@ -197,6 +217,7 @@ def main():
                 #print(variant.fathmm_score, variant.fathmm_pred, variant.fathmm_mkl_coding_score, variant.clnsig)
                 #print(variant.gnomad_genome_all)
                 #print(variant.info_dict.get("ANN"))
+                print("{} {}".format(variant.mutationassessor_pred, variant.mutationassessor_score))
 
 if __name__ == "__main__":
     main()
