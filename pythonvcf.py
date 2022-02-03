@@ -25,6 +25,12 @@ class Sneff_transcript:
         self.cds_len = splitted_ann[14]
         self.aa_pos = splitted_ann[15]
 
+    def __str__(self):
+        return "Effect: {} Impact: {} Gene: {}".format(self.effect,self.impact,self.gene)
+
+    def __repr__(self):
+        return "Effect: {} Impact: {} Gene: {}".format(self.effect,self.impact,self.gene)
+
 
 class Variant:
     def __init__(self, vcf_line):
