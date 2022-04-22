@@ -6,6 +6,27 @@ import os
 import sys
 import pythonvcf
 
+def build_set_from_txt(txt_file_name):
+    file_exists = os.path.isfile(txt_file_name)
+    if file_exists == False:
+        sys.stderr.write("File {} do not exists\n".format(txt_file_name))
+        sys.exit(2)
+    genes_list = []
+    with (gzip.open if txt_file_name.endswith(".gz") else open)(txt_file_name) as file_content:
+        for line in file_content:
+            try:
+                splitted_line = line[:-1].split("\t")
+            except:
+                sys.stderr.write("""Problem getting the gene names in this line:
+                        #{}""".format(line))
+                sys.exit(2)
+            genes_list.append(splitted_line[1])
+            genes_list.append(splitted_line[2])
+    genes_set = set(genes_list)
+    return genes_set
+ 
+
+
 
 def build_set_from_bed(bed_file_name):
     file_exists = os.path.isfile(bed_file_name)
@@ -30,13 +51,18 @@ def build_set_from_bed(bed_file_name):
 def main():
     parser = argparse.ArgumentParser(description="Subset a VCF based on a list of genes")
     parser.add_argument('-v', '--vcf', action='store', type=str, help="The VCF file path to be filtered", required=True)
-    parser.add_argument('-f', '--filtered_genes', action='store', type=str, help="The bed file path containing the genes to be filtered", required=True)
+    parser.add_argument('-f', '--filtered_genes', action='store', type=str, help="The bed/txt file path containing the genes to be filtered (bed file or txt file with second and thirs columns with gene name)", required=True)
+    parser.add_argument('-t', '--type_of_genes_file', action='store', type=str, help="The bed or the txt file with the secondo or third coloumns containing a gene name", required=False, default="bed")
     args = parser.parse_args()
 
     vcf = args.vcf
     file_with_wanted_genes = args.filtered_genes
+    type_of_genes_file = args.type_of_genes_file
 
-    set_of_wanted_genes_mutations = build_set_from_bed(file_with_wanted_genes)
+    if type_of_genes_file == "bed":
+        set_of_wanted_genes_mutations = build_set_from_bed(file_with_wanted_genes)
+    else:
+        set_of_wanted_genes_mutations = build_set_from_txt(file_with_wanted_genes)
 
     vcf_exists = os.path.isfile(vcf)
     if vcf_exists == False:
