@@ -6,7 +6,7 @@ import os
 import sys
 import pythonvcf
 
-def build_set_from_txt(txt_file_name):
+def build_set_from_txt(txt_file_name, l=[0]):
     file_exists = os.path.isfile(txt_file_name)
     if file_exists == False:
         sys.stderr.write("File {} do not exists\n".format(txt_file_name))
@@ -20,8 +20,13 @@ def build_set_from_txt(txt_file_name):
                 sys.stderr.write("""Problem getting the gene names in this line:
                         #{}""".format(line))
                 sys.exit(2)
-            genes_list.append(splitted_line[1])
-            genes_list.append(splitted_line[2])
+            for i in l:
+                try:
+                    genes_list.append(splitted_line[i])
+                except IndexError:
+                    sys.stderr.write("File {} has not the {} field\n".format(txt_file_name, i))
+                    sys.exit(2)
+            #genes_list.append(splitted_line[2])
     genes_set = set(genes_list)
     return genes_set
  
@@ -62,7 +67,7 @@ def main():
     if type_of_genes_file == "bed":
         set_of_wanted_genes_mutations = build_set_from_bed(file_with_wanted_genes)
     else:
-        set_of_wanted_genes_mutations = build_set_from_txt(file_with_wanted_genes)
+        set_of_wanted_genes_mutations = build_set_from_txt(file_with_wanted_genes, [1,2])
 
     vcf_exists = os.path.isfile(vcf)
     if vcf_exists == False:
