@@ -95,8 +95,11 @@ class Variant:
 
         self._get_variant_gnomad_stats()
 
-        self.snpeff_transcipt_list = self._get_snpeff_transcripts(self.info_dict.get("ANN"))
-        #print(self.snpeff_transcipt_list)
+        try:
+            self.snpeff_transcipt_list = self._get_snpeff_transcripts(self.info_dict.get("ANN"))
+            #print(self.snpeff_transcipt_list)
+        except:
+            self.snpeff_transcipt_list = []
 
 
     def __str__(self):
@@ -217,7 +220,25 @@ def main():
                 #print(variant.fathmm_score, variant.fathmm_pred, variant.fathmm_mkl_coding_score, variant.clnsig)
                 #print(variant.gnomad_genome_all)
                 #print(variant.info_dict.get("ANN"))
-                print("{} {}".format(variant.mutationassessor_pred, variant.mutationassessor_score))
+                #print("{} {}".format(variant.mutationassessor_pred, variant.mutationassessor_score))
+
+                clndn = variant.info_dict["CLNDN"]
+                LRT_pred = variant.info_dict["LRT_pred"]
+                #print(LRT_pred)
+                #print(variant.info_dict.get("Polyphen2_HDIV_score"))
+                #print(variant.filter)
+                sample0_gt = variant.samples_stats[0]["GT"]
+                type_of_mutation = ""
+                if sample0_gt == "0/1":
+                    trait = "heterozygous"
+                if sample0_gt == "1/1":
+                    trait = "homozygous"
+                if "recessive" in clndn: type_of_mutation = "recessive"
+                if "dominant" in clndn: type_of_mutation = "dominant"
+                if type_of_mutation != "":
+                    to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(trait, type_of_mutation, variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn)
+                    print(to_print)
+                    #print("\n")
 
 if __name__ == "__main__":
     main()
