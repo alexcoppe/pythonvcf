@@ -191,7 +191,7 @@ class Variant:
         self.clnsig = self.info_dict.get("CLNSIG")
 
     def _get_variant_gnomad_stats(self):
-        if self.info_dict.get("gnomAD_genome_ALL") == ".":
+        if self.info_dict.get("gnomAD_genome_ALL", ".") == ".":
             self.gnomad_genome_all = 0
         else:
             self.gnomad_genome_all = float(self.info_dict.get("gnomAD_genome_ALL"))
@@ -209,6 +209,12 @@ def main():
         sys.stderr.write("File {} do not exists\n".format(vcf))
         sys.exit(2)
 
+
+    trait = '.'
+
+    table_header = "chr\tposition\tidentifier\treference\talternative\tsample0_gt\tlrt_pred\tclndn\tclnsig\ttrait\ttype_of_mutation\n"
+    print(table_header)
+
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
         for line in vcf_content:
             if type(line) is str:
@@ -222,8 +228,15 @@ def main():
                 #print(variant.info_dict.get("ANN"))
                 #print("{} {}".format(variant.mutationassessor_pred, variant.mutationassessor_score))
 
-                clndn = variant.info_dict["CLNDN"]
-                LRT_pred = variant.info_dict["LRT_pred"]
+                if 'CLNDN' not in variant.info_dict:
+                    clndn = '.'
+                else:
+                    clndn = variant.info_dict["CLNDN"]
+
+                if 'LRT_pred' not in variant.info_dict:
+                    LRT_pred = '.'
+                else:
+                    LRT_pred = variant.info_dict["LRT_pred"]
                 #print(LRT_pred)
                 #print(variant.info_dict.get("Polyphen2_HDIV_score"))
                 #print(variant.filter)
@@ -235,9 +248,9 @@ def main():
                     trait = "homozygous"
                 if "recessive" in clndn: type_of_mutation = "recessive"
                 if "dominant" in clndn: type_of_mutation = "dominant"
-                if type_of_mutation != "":
-                    to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n\n\n".format(trait, type_of_mutation, variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn, variant.clnsig)
-                    print(to_print)
+                #if type_of_mutation != "":
+                to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n\n\n".format(variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn, variant.clnsig, trait, type_of_mutation, variant.samples)
+                print(to_print)
                     #print("\n")
 
 if __name__ == "__main__":
