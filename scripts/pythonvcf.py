@@ -236,7 +236,7 @@ def main():
                 if "recessive" in clndn: type_of_mutation = "recessive"
                 if "dominant" in clndn: type_of_mutation = "dominant"
                 if type_of_mutation != "":
-                    to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(trait, type_of_mutation, variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn)
+                    to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n\n\n".format(trait, type_of_mutation, variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn, variant.clnsig)
                     print(to_print)
                     #print("\n")
 
