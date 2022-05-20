@@ -122,6 +122,24 @@ class Variant:
                 n += 1
             sample_number += 1
 
+    def get_sample_stats(self):
+        #print(self.samples_stats)
+        s = ""
+        for sample in self.samples_stats.keys():
+            if sample > 0:
+                s = s + "\t"
+            sample_data = self.samples_stats.get(sample)
+            # The Genotype
+            gt = sample_data.get("GT")
+            s = s + gt 
+            # Allelic depths for the ref and alt alleles in the order listed
+            ad = sample_data.get("AD")
+            s = s + "\t" + ad
+            # Approximate read depth
+            dp = sample_data.get("DP")
+            s = s + "\t" + dp
+        return s + "\n"
+
     def _get_snpeff_transcripts(self, ANN_field):
         snpeff_transcipt_list = []
         transcripts = ANN_field.split(",")
@@ -248,8 +266,9 @@ def main():
                     trait = "homozygous"
                 if "recessive" in clndn: type_of_mutation = "recessive"
                 if "dominant" in clndn: type_of_mutation = "dominant"
+                samples_stats = variant.get_sample_stats()
                 #if type_of_mutation != "":
-                to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n\n\n".format(variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn, variant.clnsig, trait, type_of_mutation, variant.samples)
+                to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n\n\n".format(variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn, variant.clnsig, trait, type_of_mutation, variant.samples, samples_stats)
                 print(to_print)
                     #print("\n")
 
