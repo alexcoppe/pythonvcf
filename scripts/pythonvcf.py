@@ -123,7 +123,16 @@ class Variant:
             sample_number += 1
 
     def get_sample_stats(self):
-        #print(self.samples_stats)
+        """
+        Parameters
+        ----------
+        sample : self
+
+        Returns
+        -------
+        str
+            A tab separated values string with GT AD and DP values for every sample in the vcf
+        """
         s = ""
         for sample in self.samples_stats.keys():
             if sample > 0:
