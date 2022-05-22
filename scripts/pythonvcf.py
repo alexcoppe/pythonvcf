@@ -140,12 +140,18 @@ class Variant:
             sample_data = self.samples_stats.get(sample)
             # The Genotype
             gt = sample_data.get("GT")
+            if gt == None:
+                gt = "."
             s = s + gt 
             # Allelic depths for the ref and alt alleles in the order listed
             ad = sample_data.get("AD")
+            if ad == None:
+                ad = "."
             s = s + "\t" + ad
             # Approximate read depth
             dp = sample_data.get("DP")
+            if dp == None:
+                dp = "."
             s = s + "\t" + dp
         return s + "\n"
 
