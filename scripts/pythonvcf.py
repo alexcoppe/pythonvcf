@@ -173,12 +173,13 @@ class Variant:
                 self.filter)
         if len(self.snpeff_transcipt_list) != 0:
             for transcript in self.snpeff_transcipt_list:
-                snpeff_line = "{}\t{}\t{}".format(transcript.effect,
-                        transcript.impact, transcript.gene)
+                snpeff_line = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(transcript.effect,
+                        transcript.impact, transcript.gene, transcript.geneid,
+                        transcript.biotype, transcript.hgvs_c, transcript.hgvs_p,
+                        transcript.cdna_pos, transcript.cds_pos, transcript.aa_pos)
         else:
-            snpeff_line = ".\t.\t.\t"
+            snpeff_line = ".\t.\t.\t.\t.\t.\t.\t.\t.\t."
         print(line + "\t" + snpeff_line)
-        print("\n\n")
         
 
     def get_genotype_field(self, sample, field):
@@ -267,7 +268,8 @@ def main():
 
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
         header = "chromosome\tposition\tidentifier\treference\talternative\tfilter\t\
-                \teffect\timpact\tgene"
+                \teffect\timpact\tgene\tgene_id\tbiotype\thgvs_c\thgvs_p\tcdna_pos\t\
+                cds_pos\taa_pos"
         print(header)
         for line in vcf_content:
             if type(line) is str:
