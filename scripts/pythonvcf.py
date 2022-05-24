@@ -162,6 +162,23 @@ class Variant:
             snpeff_transcipt = Sneff_transcript(transcript)
             snpeff_transcipt_list.append(snpeff_transcipt)
         return snpeff_transcipt_list
+
+
+    def get_transcript_table_lines(self):
+        line = "{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome,
+                self.position,
+                self.identifier,
+                self.reference,
+                self.alternative,
+                self.filter)
+        if len(self.snpeff_transcipt_list) != 0:
+            for transcript in self.snpeff_transcipt_list:
+                snpeff_line = "{}\t{}\t{}".format(transcript.effect,
+                        transcript.impact, transcript.gene)
+        else:
+            snpeff_line = ".\t.\t.\t"
+        print(line + "\t" + snpeff_line)
+        print("\n\n")
         
 
     def get_genotype_field(self, sample, field):
@@ -245,10 +262,13 @@ def main():
 
     trait = '.'
 
-    table_header = "chr\tposition\tidentifier\treference\talternative\tsample0_gt\tlrt_pred\tclndn\tclnsig\ttrait\ttype_of_mutation\n"
-    print(table_header)
+    #table_header = "chr\tposition\tidentifier\treference\talternative\tsample0_gt\tlrt_pred\tclndn\tclnsig\ttrait\ttype_of_mutation\n"
+    #print(table_header)
 
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
+        header = "chromosome\tposition\tidentifier\treference\talternative\tfilter\t\
+                \teffect\timpact\tgene"
+        print(header)
         for line in vcf_content:
             if type(line) is str:
                 pass
@@ -282,10 +302,17 @@ def main():
                 if "recessive" in clndn: type_of_mutation = "recessive"
                 if "dominant" in clndn: type_of_mutation = "dominant"
                 samples_stats = variant.get_sample_stats()
+                if len(variant.snpeff_transcipt_list) == 0:
+                    #print("No snpeff annotation")
+                    variant.get_transcript_table_lines()
+                else:
+                    for transcript in variant.snpeff_transcipt_list:
+                        #print(transcript)
+                        variant.get_transcript_table_lines()
                 #if type_of_mutation != "":
-                to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n\n\n".format(variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn, variant.clnsig, trait, type_of_mutation, variant.samples, samples_stats)
-                print(to_print)
-                    #print("\n")
+                #to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n\n\n".format(variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn, variant.clnsig, trait, type_of_mutation, variant.samples, samples_stats)
+                #print(to_print)
+                #print("\n")
 
 if __name__ == "__main__":
     main()
