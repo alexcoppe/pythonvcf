@@ -17,7 +17,9 @@ class Sneff_transcript:
         self.featureid = splitted_ann[6]
         self.biotype = splitted_ann[7]
         self.rank = splitted_ann[8]
+        # alias HGVS_DNA, CODON): Variant in HGVS (DNA) notation
         self.hgvs_c = splitted_ann[9]
+        # (alias HGVS, HGVS_PROT, AA): Variant in HGVS (protein) notation
         self.hgvs_p = splitted_ann[10]
         self.cdna_pos = splitted_ann[11]
         self.cdna_len = splitted_ann[12]
@@ -165,7 +167,7 @@ class Variant:
 
 
     def get_transcript_table_lines(self):
-        line = "{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome,
+        line = "{}\t{}\t{}\t{}\t{}\t{}\t".format(self.chromosome,
                 self.position,
                 self.identifier,
                 self.reference,
@@ -173,13 +175,47 @@ class Variant:
                 self.filter)
         if len(self.snpeff_transcipt_list) != 0:
             for transcript in self.snpeff_transcipt_list:
-                snpeff_line = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(transcript.effect,
+                snpeff_line = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t".format(transcript.effect,
                         transcript.impact, transcript.gene, transcript.geneid,
                         transcript.biotype, transcript.hgvs_c, transcript.hgvs_p,
                         transcript.cdna_pos, transcript.cds_pos, transcript.aa_pos)
         else:
-            snpeff_line = ".\t.\t.\t.\t.\t.\t.\t.\t.\t."
-        print(line + "\t" + snpeff_line)
+            snpeff_line = ".\t.\t.\t.\t.\t.\t.\t.\t.\t.\t"
+
+        #output = line + snpeff_line
+        #print(output)
+
+        # A string consisting of the disease name used by the database specified by CLNDISDB
+        if 'CLNDN' not in self.info_dict:
+            clndn = '.'
+        else:
+            clndn = self.info_dict["CLNDN"]
+
+
+
+        type_of_mutation = "."
+        if "recessive" in clndn: type_of_mutation = "recessive"
+        if "dominant" in clndn: type_of_mutation = "dominant"
+
+        more_info = "{}\t{}".format(clndn, type_of_mutation)
+
+        line = line + snpeff_line + more_info
+        print(line)
+
+            #if type_of_mutation != "":
+            #to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n\n\n".format(variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn, variant.clnsig, trait, type_of_mutation, variant.samples, samples_stats)
+            #print(to_print)
+        #info_string = self.sample0_gt
+
+                #sample0_gt = self.samples_stats[0]["GT"]
+                #print(sample0_gt)
+                #type_of_mutation = ""
+                #if sample0_gt == "0/1":
+                    #trait = "heterozygous"
+                #if sample0_gt == "1/1":
+                    #trait = "homozygous"
+        #print(info_string)
+        #print(line + "\t" + snpeff_line)
         
 
     def get_genotype_field(self, sample, field):
@@ -268,8 +304,8 @@ def main():
 
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
         header = "chromosome\tposition\tidentifier\treference\talternative\tfilter\t\
-                \teffect\timpact\tgene\tgene_id\tbiotype\thgvs_c\thgvs_p\tcdna_pos\t\
-                cds_pos\taa_pos"
+                effect\timpact\tgene\tgene_id\tbiotype\thgvs_c\thgvs_p\tcdna_pos\t\
+                cds_pos\taa_pos\tCLNDN\ttype_of_mutation"
         print(header)
         for line in vcf_content:
             if type(line) is str:
@@ -283,11 +319,6 @@ def main():
                 #print(variant.info_dict.get("ANN"))
                 #print("{} {}".format(variant.mutationassessor_pred, variant.mutationassessor_score))
 
-                if 'CLNDN' not in variant.info_dict:
-                    clndn = '.'
-                else:
-                    clndn = variant.info_dict["CLNDN"]
-
                 if 'LRT_pred' not in variant.info_dict:
                     LRT_pred = '.'
                 else:
@@ -296,13 +327,13 @@ def main():
                 #print(variant.info_dict.get("Polyphen2_HDIV_score"))
                 #print(variant.filter)
                 sample0_gt = variant.samples_stats[0]["GT"]
-                type_of_mutation = ""
+                #type_of_mutation = ""
                 if sample0_gt == "0/1":
                     trait = "heterozygous"
                 if sample0_gt == "1/1":
                     trait = "homozygous"
-                if "recessive" in clndn: type_of_mutation = "recessive"
-                if "dominant" in clndn: type_of_mutation = "dominant"
+                #if "recessive" in clndn: type_of_mutation = "recessive"
+                #if "dominant" in clndn: type_of_mutation = "dominant"
                 samples_stats = variant.get_sample_stats()
                 if len(variant.snpeff_transcipt_list) == 0:
                     #print("No snpeff annotation")
