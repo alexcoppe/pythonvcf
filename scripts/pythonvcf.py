@@ -197,10 +197,13 @@ class Variant:
         if "recessive" in clndn: type_of_mutation = "recessive"
         if "dominant" in clndn: type_of_mutation = "dominant"
 
-        more_info = "{}\t{}".format(clndn, type_of_mutation)
+        more_info = "{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig,
+                self.samples, self.samples_stats)
 
         line = line + snpeff_line + more_info
         print(line)
+
+
 
             #if type_of_mutation != "":
             #to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n\n\n".format(variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn, variant.clnsig, trait, type_of_mutation, variant.samples, samples_stats)
@@ -305,7 +308,7 @@ def main():
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
         header = "chromosome\tposition\tidentifier\treference\talternative\tfilter\t\
                 effect\timpact\tgene\tgene_id\tbiotype\thgvs_c\thgvs_p\tcdna_pos\t\
-                cds_pos\taa_pos\tCLNDN\ttype_of_mutation"
+                cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig"
         print(header)
         for line in vcf_content:
             if type(line) is str:
