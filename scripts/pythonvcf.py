@@ -182,9 +182,6 @@ class Variant:
         else:
             snpeff_line = ".\t.\t.\t.\t.\t.\t.\t.\t.\t.\t"
 
-        #output = line + snpeff_line
-        #print(output)
-
         # A string consisting of the disease name used by the database specified by CLNDISDB
         if 'CLNDN' not in self.info_dict:
             clndn = '.'
@@ -197,29 +194,32 @@ class Variant:
         if "recessive" in clndn: type_of_mutation = "recessive"
         if "dominant" in clndn: type_of_mutation = "dominant"
 
-        more_info = "{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig,
-                self.samples, self.samples_stats)
+        unnamed_columns = ""
+        number_of_samples = len(self.samples_stats.keys())
+        i = 0
+        for sample in self.samples_stats.keys():
+            values = self.samples_stats[sample]
+            #print(values)
+            gt = values.get("GT")
+            ad = values.get("AD")
+            dp = values.get("DP")
+            frequence =  [int(freq) for freq in ad.split(",")]
+            if len(frequence) == 1:
+                frequence = [int(ad), int(values.get("RD"))]
+            ref,alt = frequence
+            unnamed_columns = unnamed_columns +  gt + "\t" + ad + "\t" + dp + "\t" + str(ref) + "\t" + str(alt) + "\t" + str(round(float(alt) / float(ref), 5))
+            i += 1
+            if i <= number_of_samples:
+                unnamed_columns = unnamed_columns + "\t"
 
-        line = line + snpeff_line + more_info
+        #more_info = "{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig,
+                #self.samples, self.samples_stats)
+
+        more_info = "{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig)
+
+        line = line + snpeff_line + more_info + "\t" + unnamed_columns
         print(line)
 
-
-
-            #if type_of_mutation != "":
-            #to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n\n\n".format(variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn, variant.clnsig, trait, type_of_mutation, variant.samples, samples_stats)
-            #print(to_print)
-        #info_string = self.sample0_gt
-
-                #sample0_gt = self.samples_stats[0]["GT"]
-                #print(sample0_gt)
-                #type_of_mutation = ""
-                #if sample0_gt == "0/1":
-                    #trait = "heterozygous"
-                #if sample0_gt == "1/1":
-                    #trait = "homozygous"
-        #print(info_string)
-        #print(line + "\t" + snpeff_line)
-        
 
     def get_genotype_field(self, sample, field):
         """
@@ -285,6 +285,11 @@ class Variant:
             self.gnomad_genome_all = 0
         else:
             self.gnomad_genome_all = float(self.info_dict.get("gnomAD_genome_ALL"))
+
+    def get_sample_values(self):
+        for sample in self.samples_stats.keys():
+            print(self.samples_stats.get())
+
 
 
 def main():
