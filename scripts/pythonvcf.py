@@ -199,11 +199,15 @@ class Variant:
         i = 0
         for sample in self.samples_stats.keys():
             values = self.samples_stats[sample]
-            #print(values)
+            # GT: Genotype
             gt = values.get("GT")
+            # AD: Allelic depths for the ref and alt alleles in the ord er listed
             ad = values.get("AD")
+            # DP: Approximate read depth
             dp = values.get("DP")
             frequence =  [int(freq) for freq in ad.split(",")]
+            # If ad has only one variable use the RD value 
+            # RD: Depth of reference-supporting bases
             if len(frequence) == 1:
                 frequence = [int(ad), int(values.get("RD"))]
             ref,alt = frequence
@@ -215,7 +219,7 @@ class Variant:
         #more_info = "{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig,
                 #self.samples, self.samples_stats)
 
-        more_info = "{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig)
+        more_info = "{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all)
 
         line = line + snpeff_line + more_info + "\t" + unnamed_columns
         print(line)
@@ -313,7 +317,7 @@ def main():
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
         header = "chromosome\tposition\tidentifier\treference\talternative\tfilter\t\
                 effect\timpact\tgene\tgene_id\tbiotype\thgvs_c\thgvs_p\tcdna_pos\t\
-                cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig"
+                cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tgnomad_freq"
         print(header)
         for line in vcf_content:
             if type(line) is str:
