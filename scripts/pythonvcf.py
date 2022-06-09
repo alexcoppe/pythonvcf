@@ -211,7 +211,11 @@ class Variant:
             if len(frequence) == 1:
                 frequence = [int(ad), int(values.get("RD"))]
             ref,alt = frequence
-            unnamed_columns = unnamed_columns +  gt + "\t" + ad + "\t" + dp + "\t" + str(ref) + "\t" + str(alt) + "\t" + str(round(float(alt) / float(ref), 5))
+            if frequence[0] != 0:
+                tumoral_variant_frequency = str(round(float(alt) / float(ref), 5))
+            else:
+                tumoral_variant_frequency = "Inf"
+            unnamed_columns = unnamed_columns +  gt + "\t" + ad + "\t" + dp + "\t" + str(ref) + "\t" + str(alt) + "\t" + tumoral_variant_frequency
             i += 1
             if i <= number_of_samples:
                 unnamed_columns = unnamed_columns + "\t"
