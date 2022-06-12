@@ -205,6 +205,8 @@ class Variant:
             ad = values.get("AD")
             # DP: Approximate read depth
             dp = values.get("DP")
+            if dp == None:
+                dp = "."
             frequence =  [int(freq) for freq in ad.split(",")]
             # If ad has only one variable use the RD value 
             # RD: Depth of reference-supporting bases
