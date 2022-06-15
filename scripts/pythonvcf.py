@@ -216,7 +216,7 @@ class Variant:
             if frequence[0] != 0:
                 tumoral_variant_frequency = str(round(float(alt) / float(ref), 5))
             else:
-                tumoral_variant_frequency = "Inf"
+                tumoral_variant_frequency = "Unknown"
             unnamed_columns = unnamed_columns +  gt + "\t" + ad + "\t" + dp + "\t" + str(ref) + "\t" + str(alt) + "\t" + tumoral_variant_frequency
             i += 1
             if i <= number_of_samples:
@@ -225,7 +225,8 @@ class Variant:
         #more_info = "{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig,
                 #self.samples, self.samples_stats)
 
-        more_info = "{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all)
+        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
+                self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred)
 
         line = line + snpeff_line + more_info + "\t" + unnamed_columns
         print(line)
@@ -323,7 +324,8 @@ def main():
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
         header = "chromosome\tposition\tidentifier\treference\talternative\tfilter\t\
                 effect\timpact\tgene\tgene_id\tbiotype\thgvs_c\thgvs_p\tcdna_pos\t\
-                cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tgnomad_freq"
+                cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tgnomad_freq\t\
+                fathmm_pred\tfathmm_score\tfathmm_mkl_coding_score\tfathmm_mkl_coding_pred"
         print(header)
         for line in vcf_content:
             if type(line) is str:
