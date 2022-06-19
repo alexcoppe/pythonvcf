@@ -91,6 +91,11 @@ class Variant:
         self.mutationassessor_score = None
         self.mutationassessor_pred = None
 
+        # Description : Combined Annotation Dependent Depletion (CADD) - 
+        # tool for scoring the deleteriousness of single nucleotide variants as well as insertion/deletions variants in the human genome.
+        # CADD predicts a continuous phred-like score that ranges from 1 to 99, higher values indicating more deleterious cases
+        self.cadd_phred = None
+
         self._get_variant_effects()
 
         self.gnomad_genome_all = None
@@ -225,8 +230,8 @@ class Variant:
         #more_info = "{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig,
                 #self.samples, self.samples_stats)
 
-        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
-                self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred)
+        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
+                self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred)
 
         line = line + snpeff_line + more_info + "\t" + unnamed_columns
         print(line)
@@ -288,6 +293,8 @@ class Variant:
         # H = high
         self.mutationassessor_score = self.info_dict.get("MutationAssessor_score")
         self.mutationassessor_pred = self.info_dict.get("MutationAssessor_pred")
+        # CADD predicts a continuous phred-like score that ranges from 1 to 99, higher values indicating more deleterious cases
+        self.cadd_phred = self.info_dict.get("CADD_phred")
 
         self.clnsig = self.info_dict.get("CLNSIG")
 
@@ -325,7 +332,8 @@ def main():
         header = "chromosome\tposition\tidentifier\treference\talternative\tfilter\t\
                 effect\timpact\tgene\tgene_id\tbiotype\thgvs_c\thgvs_p\tcdna_pos\t\
                 cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tgnomad_freq\t\
-                fathmm_pred\tfathmm_score\tfathmm_mkl_coding_score\tfathmm_mkl_coding_pred"
+                fathmm_pred\tfathmm_score\tfathmm_mkl_coding_score\tfathmm_mkl_coding_pred\t\
+                cadd_phred"
         print(header)
         for line in vcf_content:
             if type(line) is str:
