@@ -102,6 +102,9 @@ class Variant:
         # the structure and function of a human protein. This score represents the probability that a substitution is damaging.
         self.polyphen2_hvar_score = None
         self.polyphen2_hvar_pred = None
+        # A SIFT score predicts whether an amino acid substitution affects protein function.
+        self.sift_score = None
+        self.sift_pred = None
 
         self._get_variant_effects()
 
@@ -237,9 +240,10 @@ class Variant:
         #more_info = "{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig,
                 #self.samples, self.samples_stats)
 
-        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
+        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+                clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
                 self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred, self.dann_score,
-                self.polyphen2_hvar_score, self.polyphen2_hvar_pred)
+                self.polyphen2_hvar_score, self.polyphen2_hvar_pred, self.sift_score, self.sift_pred)
 
         line = line + snpeff_line + more_info + "\t" + unnamed_columns
         print(line)
@@ -316,6 +320,12 @@ class Variant:
         # PolyPhen-2 and SIFT scores use the same range, 0.0 to 1.0, but with opposite meanings. A variant with a PolyPhen-2 score of 0.0 is predicted to be benign. A variant with a SIFT score of 1.0 is predicted to be benign.
         self.polyphen2_hvar_score = self.info_dict.get("Polyphen2_HDIV_score")
         self.polyphen2_hvar_pred = self.info_dict.get("Polyphen2_HVAR_pred")
+        # A SIFT score predicts whether an amino acid substitution affects protein function.
+        # The SIFT score ranges from 0.0 (deleterious) to 1.0 (tolerated). The score can be interpreted as follows:
+        # - 0.0 to 0.05 -- Variants with scores in this range are considered deleterious. Variants with scores closer to 0.0 are more confidently predicted to be deleterious.
+        # - 0.05 to 1.0-- Variants with scores in this range are predicted to be tolerated (benign). Variants with scores very close to 1.0 are more confidently predicted to be tolerated.
+        self.sift_score = self.info_dict.get("SIFT_score")
+        self.sift_pred = self.info_dict.get("SIFT_pred")
 
         self.clnsig = self.info_dict.get("CLNSIG")
 
@@ -354,7 +364,8 @@ def main():
                 effect\timpact\tgene\tgene_id\tbiotype\thgvs_c\thgvs_p\tcdna_pos\t\
                 cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tgnomad_freq\t\
                 fathmm_pred\tfathmm_score\tfathmm_mkl_coding_score\tfathmm_mkl_coding_pred\t\
-                cadd_phred\tdann_score\tpolyphen2_hvar_score"
+                cadd_phred\tdann_score\tpolyphen2_hvar_score\tpolyphen2_hvar_pred\t\
+                sift_score\tsift_pred"
         print(header)
         for line in vcf_content:
             if type(line) is str:
