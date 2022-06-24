@@ -101,6 +101,7 @@ class Variant:
         # The PolyPhen-2 score predicts the possible impact of an amino acid substitution on 
         # the structure and function of a human protein. This score represents the probability that a substitution is damaging.
         self.polyphen2_hvar_score = None
+        self.polyphen2_hvar_pred = None
 
         self._get_variant_effects()
 
@@ -236,8 +237,9 @@ class Variant:
         #more_info = "{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig,
                 #self.samples, self.samples_stats)
 
-        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
-                self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred, self.dann_score, self.polyphen2_hvar_score)
+        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
+                self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred, self.dann_score,
+                self.polyphen2_hvar_score, self.polyphen2_hvar_pred)
 
         line = line + snpeff_line + more_info + "\t" + unnamed_columns
         print(line)
@@ -313,6 +315,7 @@ class Variant:
         # - 0.85 to 1.0 -- Variants with scores in this range are more confidently predicted to be damaging.
         # PolyPhen-2 and SIFT scores use the same range, 0.0 to 1.0, but with opposite meanings. A variant with a PolyPhen-2 score of 0.0 is predicted to be benign. A variant with a SIFT score of 1.0 is predicted to be benign.
         self.polyphen2_hvar_score = self.info_dict.get("Polyphen2_HDIV_score")
+        self.polyphen2_hvar_pred = self.info_dict.get("Polyphen2_HVAR_pred")
 
         self.clnsig = self.info_dict.get("CLNSIG")
 
