@@ -98,6 +98,9 @@ class Variant:
         # DANN is a functional prediction score based on a deep neural network.
         # The score can range from 0 to 1, when higher values are more likely to be deleterious.
         self.dann_score = None
+        # The PolyPhen-2 score predicts the possible impact of an amino acid substitution on 
+        # the structure and function of a human protein. This score represents the probability that a substitution is damaging.
+        self.polyphen2_hvar_score = None
 
         self._get_variant_effects()
 
@@ -233,8 +236,8 @@ class Variant:
         #more_info = "{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig,
                 #self.samples, self.samples_stats)
 
-        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
-                self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred, self.dann_score)
+        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
+                self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred, self.dann_score, self.polyphen2_hvar_score)
 
         line = line + snpeff_line + more_info + "\t" + unnamed_columns
         print(line)
@@ -301,6 +304,15 @@ class Variant:
         # DANN is a functional prediction score based on a deep neural network.
         # The score can range from 0 to 1, when higher values are more likely to be deleterious.
         self.dann_score = self.info_dict.get("DANN_score")
+        # The PolyPhen-2 score predicts the possible impact of an amino acid substitution on 
+        # the structure and function of a human protein. This score represents the probability that a substitution is damaging.
+        # Ion Reporter Software reports the pph2-prob PolyPhen-2 score.
+        # The PolyPhen-2 score ranges from 0.0 (tolerated) to 1.0 (deleterious). Variants with scores of 0.0 are predicted to be benign. Values closer to 1.0 are more confidently predicted to be deleterious. The score can be interpreted as follows:
+        # -  0.0 to 0.15 -- Variants with scores in this range are predicted to be benign.
+        # - 0.15 to 1.0 -- Variants with scores in this range are possibly damaging.
+        # - 0.85 to 1.0 -- Variants with scores in this range are more confidently predicted to be damaging.
+        # PolyPhen-2 and SIFT scores use the same range, 0.0 to 1.0, but with opposite meanings. A variant with a PolyPhen-2 score of 0.0 is predicted to be benign. A variant with a SIFT score of 1.0 is predicted to be benign.
+        self.polyphen2_hvar_score = self.info_dict.get("Polyphen2_HDIV_score")
 
         self.clnsig = self.info_dict.get("CLNSIG")
 
@@ -339,7 +351,7 @@ def main():
                 effect\timpact\tgene\tgene_id\tbiotype\thgvs_c\thgvs_p\tcdna_pos\t\
                 cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tgnomad_freq\t\
                 fathmm_pred\tfathmm_score\tfathmm_mkl_coding_score\tfathmm_mkl_coding_pred\t\
-                cadd_phred\tdann_score"
+                cadd_phred\tdann_score\tpolyphen2_hvar_score"
         print(header)
         for line in vcf_content:
             if type(line) is str:
