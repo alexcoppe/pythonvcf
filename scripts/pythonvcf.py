@@ -105,6 +105,12 @@ class Variant:
         # A SIFT score predicts whether an amino acid substitution affects protein function.
         self.sift_score = None
         self.sift_pred = None
+        # Predicted loss of function effects for this variant. Format: 
+        # 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected'"
+        self.lof = None
+        # Predicted nonsense mediated decay effects for this variant. Format: 
+        # 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected
+        self.nmd = None
 
         self._get_variant_effects()
 
@@ -240,10 +246,11 @@ class Variant:
         #more_info = "{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig,
                 #self.samples, self.samples_stats)
 
-        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
                 clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
                 self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred, self.dann_score,
-                self.polyphen2_hvar_score, self.polyphen2_hvar_pred, self.sift_score, self.sift_pred)
+                self.polyphen2_hvar_score, self.polyphen2_hvar_pred, self.sift_score, self.sift_pred,
+                self.lof, self.nmd)
 
         line = line + snpeff_line + more_info + "\t" + unnamed_columns
         print(line)
@@ -326,6 +333,16 @@ class Variant:
         # - 0.05 to 1.0-- Variants with scores in this range are predicted to be tolerated (benign). Variants with scores very close to 1.0 are more confidently predicted to be tolerated.
         self.sift_score = self.info_dict.get("SIFT_score")
         self.sift_pred = self.info_dict.get("SIFT_pred")
+        # Predicted loss of function effects for this variant. Format:
+        # 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected'"
+        self.lof = self.info_dict.get("LOF")
+        if self.lof != None:
+            self.lof = self.lof[1:len(self.lof)][:-1].split("|")[-1]
+        # Predicted nonsense mediated decay effects for this variant. Format: 
+        # 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected
+        self.nmd = self.info_dict.get("NMD")
+        if self.nmd != None:
+            self.nmd = self.nmd[1:len(self.nmd)][:-1].split("|")[-1]
 
         self.clnsig = self.info_dict.get("CLNSIG")
 
@@ -365,7 +382,7 @@ def main():
                 cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tgnomad_freq\t\
                 fathmm_pred\tfathmm_score\tfathmm_mkl_coding_score\tfathmm_mkl_coding_pred\t\
                 cadd_phred\tdann_score\tpolyphen2_hvar_score\tpolyphen2_hvar_pred\t\
-                sift_score\tsift_pred"
+                sift_score\tsift_pred\tlof\tnmd"
         print(header)
         for line in vcf_content:
             if type(line) is str:
