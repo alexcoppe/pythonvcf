@@ -111,6 +111,8 @@ class Variant:
         # Predicted nonsense mediated decay effects for this variant. Format: 
         # 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected
         self.nmd = None
+        # Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities
+        self.mqranksum = None
 
         self._get_variant_effects()
 
@@ -246,11 +248,11 @@ class Variant:
         #more_info = "{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig,
                 #self.samples, self.samples_stats)
 
-        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
                 clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
                 self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred, self.dann_score,
                 self.polyphen2_hvar_score, self.polyphen2_hvar_pred, self.sift_score, self.sift_pred,
-                self.lof, self.nmd)
+                self.lof, self.nmd, self.mqranksum)
 
         line = line + snpeff_line + more_info + "\t" + unnamed_columns
         print(line)
@@ -343,6 +345,7 @@ class Variant:
         self.nmd = self.info_dict.get("NMD")
         if self.nmd != None:
             self.nmd = self.nmd[1:len(self.nmd)][:-1].split("|")[-1]
+        self.mqranksum = self.info_dict.get("MQRankSum")
 
         self.clnsig = self.info_dict.get("CLNSIG")
 
@@ -382,7 +385,7 @@ def main():
                 cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tgnomad_freq\t\
                 fathmm_pred\tfathmm_score\tfathmm_mkl_coding_score\tfathmm_mkl_coding_pred\t\
                 cadd_phred\tdann_score\tpolyphen2_hvar_score\tpolyphen2_hvar_pred\t\
-                sift_score\tsift_pred\tlof\tnmd"
+                sift_score\tsift_pred\tlof\tnmd\tmqranksum"
         print(header)
         for line in vcf_content:
             if type(line) is str:
