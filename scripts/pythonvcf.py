@@ -189,7 +189,7 @@ class Variant:
         return snpeff_transcipt_list
 
 
-    def get_transcript_table_lines(self):
+    def get_transcript_table_lines(self, name = None):
         line = "{}\t{}\t{}\t{}\t{}\t{}\t".format(self.chromosome,
                 self.position,
                 self.identifier,
@@ -255,6 +255,8 @@ class Variant:
                 self.lof, self.nmd, self.mqranksum)
 
         line = line + snpeff_line + more_info + "\t" + unnamed_columns
+        if name != None:
+            line = name + "\t" + line
         print(line)
 
 
@@ -364,9 +366,11 @@ class Variant:
 def main():
     parser = argparse.ArgumentParser(description="Parse a VCF file")
     parser.add_argument('-v', '--vcf', action='store', type=str, help="The vcf to be parsed", required=True)
+    parser.add_argument('-n', '--name', action='store', type=str, help="The sample name", required=False, default=None)
     args = parser.parse_args()
 
     vcf = args.vcf
+    name = args.name
 
     vcf_exists = os.path.isfile(vcf)
     if vcf_exists == False:
@@ -386,6 +390,8 @@ def main():
                 fathmm_pred\tfathmm_score\tfathmm_mkl_coding_score\tfathmm_mkl_coding_pred\t\
                 cadd_phred\tdann_score\tpolyphen2_hvar_score\tpolyphen2_hvar_pred\t\
                 sift_score\tsift_pred\tlof\tnmd\tmqranksum"
+        if args.name:
+            header = "sample_name" + "\t" + header
         print(header)
         for line in vcf_content:
             if type(line) is str:
@@ -417,11 +423,11 @@ def main():
                 samples_stats = variant.get_sample_stats()
                 if len(variant.snpeff_transcipt_list) == 0:
                     #print("No snpeff annotation")
-                    variant.get_transcript_table_lines()
+                    variant.get_transcript_table_lines(args.name)
                 else:
                     for transcript in variant.snpeff_transcipt_list:
                         #print(transcript)
-                        variant.get_transcript_table_lines()
+                        variant.get_transcript_table_lines(args.name)
                 #if type_of_mutation != "":
                 #to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n\n\n".format(variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn, variant.clnsig, trait, type_of_mutation, variant.samples, samples_stats)
                 #print(to_print)
