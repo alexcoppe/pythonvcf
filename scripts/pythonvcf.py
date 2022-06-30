@@ -122,7 +122,6 @@ class Variant:
 
         try:
             self.snpeff_transcipt_list = self._get_snpeff_transcripts(self.info_dict.get("ANN"))
-            #print(self.snpeff_transcipt_list)
         except:
             self.snpeff_transcipt_list = []
 
@@ -211,8 +210,6 @@ class Variant:
         else:
             clndn = self.info_dict["CLNDN"]
 
-
-
         type_of_mutation = "."
         if "recessive" in clndn: type_of_mutation = "recessive"
         if "dominant" in clndn: type_of_mutation = "dominant"
@@ -245,8 +242,6 @@ class Variant:
             if i <= number_of_samples:
                 unnamed_columns = unnamed_columns + "\t"
 
-        #more_info = "{}\t{}\t{}\t{}\t{}".format(clndn, type_of_mutation, self.clnsig,
-                #self.samples, self.samples_stats)
 
         more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
                 clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
@@ -367,10 +362,12 @@ def main():
     parser = argparse.ArgumentParser(description="Parse a VCF file")
     parser.add_argument('-v', '--vcf', action='store', type=str, help="The vcf to be parsed", required=True)
     parser.add_argument('-n', '--name', action='store', type=str, help="The sample name", required=False, default=None)
+    parser.add_argument('-f', '--first', action='store_true', help="Print only the first variant")
     args = parser.parse_args()
 
     vcf = args.vcf
     name = args.name
+    first = args.first
 
     vcf_exists = os.path.isfile(vcf)
     if vcf_exists == False:
@@ -379,9 +376,6 @@ def main():
 
 
     trait = '.'
-
-    #table_header = "chr\tposition\tidentifier\treference\talternative\tsample0_gt\tlrt_pred\tclndn\tclnsig\ttrait\ttype_of_mutation\n"
-    #print(table_header)
 
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
         header = "chromosome\tposition\tidentifier\treference\talternative\tfilter\t\
@@ -400,38 +394,24 @@ def main():
                 line = line.decode('UTF-8')
             if line[0] != '#':
                 variant = Variant(line)
-                #print(variant.fathmm_score, variant.fathmm_pred, variant.fathmm_mkl_coding_score, variant.clnsig)
-                #print(variant.gnomad_genome_all)
-                #print(variant.info_dict.get("ANN"))
-                #print("{} {}".format(variant.mutationassessor_pred, variant.mutationassessor_score))
 
                 if 'LRT_pred' not in variant.info_dict:
                     LRT_pred = '.'
                 else:
                     LRT_pred = variant.info_dict["LRT_pred"]
-                #print(LRT_pred)
-                #print(variant.info_dict.get("Polyphen2_HDIV_score"))
-                #print(variant.filter)
                 sample0_gt = variant.samples_stats[0]["GT"]
-                #type_of_mutation = ""
                 if sample0_gt == "0/1":
                     trait = "heterozygous"
                 if sample0_gt == "1/1":
                     trait = "homozygous"
-                #if "recessive" in clndn: type_of_mutation = "recessive"
-                #if "dominant" in clndn: type_of_mutation = "dominant"
                 samples_stats = variant.get_sample_stats()
                 if len(variant.snpeff_transcipt_list) == 0:
-                    #print("No snpeff annotation")
                     variant.get_transcript_table_lines(args.name)
                 else:
                     for transcript in variant.snpeff_transcipt_list:
-                        #print(transcript)
                         variant.get_transcript_table_lines(args.name)
-                #if type_of_mutation != "":
-                #to_print = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n\n\n".format(variant.chromosome, variant.position, variant.identifier, variant.reference, variant.alternative, sample0_gt, LRT_pred, clndn, variant.clnsig, trait, type_of_mutation, variant.samples, samples_stats)
-                #print(to_print)
-                #print("\n")
+                        if first == True:
+                            break
 
 if __name__ == "__main__":
     main()
