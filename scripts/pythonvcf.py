@@ -189,20 +189,13 @@ class Variant:
 
 
     def get_transcript_table_lines(self, name = None):
+        lines = []
         line = "{}\t{}\t{}\t{}\t{}\t{}\t".format(self.chromosome,
                 self.position,
                 self.identifier,
                 self.reference,
                 self.alternative,
                 self.filter)
-        if len(self.snpeff_transcipt_list) != 0:
-            for transcript in self.snpeff_transcipt_list:
-                snpeff_line = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t".format(transcript.effect,
-                        transcript.impact, transcript.gene, transcript.geneid,
-                        transcript.biotype, transcript.hgvs_c, transcript.hgvs_p,
-                        transcript.cdna_pos, transcript.cds_pos, transcript.aa_pos)
-        else:
-            snpeff_line = ".\t.\t.\t.\t.\t.\t.\t.\t.\t.\t"
 
         # A string consisting of the disease name used by the database specified by CLNDISDB
         if 'CLNDN' not in self.info_dict:
@@ -213,6 +206,12 @@ class Variant:
         type_of_mutation = "."
         if "recessive" in clndn: type_of_mutation = "recessive"
         if "dominant" in clndn: type_of_mutation = "dominant"
+
+        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+                clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
+                self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred, self.dann_score,
+                self.polyphen2_hvar_score, self.polyphen2_hvar_pred, self.sift_score, self.sift_pred,
+                self.lof, self.nmd, self.mqranksum)
 
         unnamed_columns = ""
         number_of_samples = len(self.samples_stats.keys())
@@ -243,17 +242,21 @@ class Variant:
                 unnamed_columns = unnamed_columns + "\t"
 
 
-        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
-                clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
-                self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred, self.dann_score,
-                self.polyphen2_hvar_score, self.polyphen2_hvar_pred, self.sift_score, self.sift_pred,
-                self.lof, self.nmd, self.mqranksum)
-
-        line = line + snpeff_line + more_info + "\t" + unnamed_columns
-        if name != None:
-            line = name + "\t" + line
-        print(line)
-
+        snpeff_transcipts = []
+        if len(self.snpeff_transcipt_list) != 0:
+            for transcript in self.snpeff_transcipt_list:
+                snpeff_line = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t".format(transcript.effect,
+                        transcript.impact, transcript.gene, transcript.geneid,
+                        transcript.biotype, transcript.hgvs_c, transcript.hgvs_p,
+                        transcript.cdna_pos, transcript.cds_pos, transcript.aa_pos)
+                snpeff_transcipts.append(snpeff_line)
+        else:
+            snpeff_line = ".\t.\t.\t.\t.\t.\t.\t.\t.\t.\t"
+            snpeff_transcipts.append(snpeff_line)
+        for transcript in snpeff_transcipts:
+            line = line + transcript + more_info + "\t" + unnamed_columns
+            lines.append(line)
+        return lines
 
     def get_genotype_field(self, sample, field):
         """
@@ -405,13 +408,13 @@ def main():
                 if sample0_gt == "1/1":
                     trait = "homozygous"
                 samples_stats = variant.get_sample_stats()
-                if len(variant.snpeff_transcipt_list) == 0:
-                    variant.get_transcript_table_lines(args.name)
-                else:
-                    for transcript in variant.snpeff_transcipt_list:
-                        variant.get_transcript_table_lines(args.name)
-                        if first == True:
-                            break
+                variants = variant.get_transcript_table_lines(args.name)
+                for v in variants:
+                    if name:
+                        v = name + "\t" + v
+                    print(v)
+                    if first == True:
+                        break
 
 if __name__ == "__main__":
     main()
