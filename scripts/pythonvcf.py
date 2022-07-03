@@ -177,7 +177,7 @@ class Variant:
             if dp == None:
                 dp = "."
             s = s + "\t" + dp
-        return s + "\n"
+        return s
 
     def _get_snpeff_transcripts(self, ANN_field):
         snpeff_transcipt_list = []
@@ -187,10 +187,40 @@ class Variant:
             snpeff_transcipt_list.append(snpeff_transcipt)
         return snpeff_transcipt_list
 
+    def get_sample_values(self, key_values_dictionary):
+        d = {}
+        # GT: Genotype
+        gt = key_values_dictionary.get("GT")
+        d["gt"] = gt
+        # AD: Allelic depths for the ref and alt alleles in the ord er listed
+        ad = key_values_dictionary.get("AD")
+        if ad == None:
+            ad = "."
+        d["ad"] = ad
+        # DP: Approximate read depth
+        dp = key_values_dictionary.get("DP")
+        if dp == None:
+            dp = "."
+        d["dp"] = dp
+        frequence =  [int(freq) for freq in ad.split(",")]
+        # If ad has only one variable use the RD value 
+        # RD: Depth of reference-supporting bases
+        if len(frequence) == 1:
+            frequence = [int(ad), int(key_values_dictionary.get("RD"))]
+        ref,alt = frequence[0],frequence[1]
+        d["ref"] = ref
+        d["alt"] = alt
+        if frequence[0] != 0:
+            tumoral_variant_frequency = str(round(float(alt) / (float(ref) + float(alt)), 5))
+        else:
+            tumoral_variant_frequency = "Unknown"
+        d["tumoral_variant_frequency"] = tumoral_variant_frequency
+        return d
+
 
     def get_transcript_table_lines(self, name = None):
         lines = []
-        line = "{}\t{}\t{}\t{}\t{}\t{}\t".format(self.chromosome,
+        starting_line = "{}\t{}\t{}\t{}\t{}\t{}\t".format(self.chromosome,
                 self.position,
                 self.identifier,
                 self.reference,
@@ -218,25 +248,8 @@ class Variant:
         i = 0
         for sample in self.samples_stats.keys():
             values = self.samples_stats[sample]
-            # GT: Genotype
-            gt = values.get("GT")
-            # AD: Allelic depths for the ref and alt alleles in the ord er listed
-            ad = values.get("AD")
-            # DP: Approximate read depth
-            dp = values.get("DP")
-            if dp == None:
-                dp = "."
-            frequence =  [int(freq) for freq in ad.split(",")]
-            # If ad has only one variable use the RD value 
-            # RD: Depth of reference-supporting bases
-            if len(frequence) == 1:
-                frequence = [int(ad), int(values.get("RD"))]
-            ref,alt = frequence
-            if frequence[0] != 0:
-                tumoral_variant_frequency = str(round(float(alt) / float(ref), 5))
-            else:
-                tumoral_variant_frequency = "Unknown"
-            unnamed_columns = unnamed_columns +  gt + "\t" + ad + "\t" + dp + "\t" + str(ref) + "\t" + str(alt) + "\t" + tumoral_variant_frequency
+            sample_stats = self.get_sample_values(values)
+            unnamed_columns = unnamed_columns +  sample_stats.get("gt") + "\t" + sample_stats.get("ad") + "\t" + sample_stats.get("dp") + "\t" + str(sample_stats.get("ref")) + "\t" + str(sample_stats.get("alt")) + "\t" + sample_stats.get("tumoral_variant_frequency")
             i += 1
             if i <= number_of_samples:
                 unnamed_columns = unnamed_columns + "\t"
@@ -254,8 +267,8 @@ class Variant:
             snpeff_line = ".\t.\t.\t.\t.\t.\t.\t.\t.\t.\t"
             snpeff_transcipts.append(snpeff_line)
         for transcript in snpeff_transcipts:
-            line = line + transcript + more_info + "\t" + unnamed_columns
-            lines.append(line)
+            complete_line = starting_line + transcript + more_info + "\t" + unnamed_columns
+            lines.append(complete_line)
         return lines
 
     def get_genotype_field(self, sample, field):
@@ -303,7 +316,6 @@ class Variant:
         # P-values close to the extremes (0 or 1) are the highest-confidence predictions that yield the highest accuracy.
         self.fathmm_mkl_coding_score = self.info_dict.get("fathmm-MKL_coding_score")
         self.fathmm_mkl_coding_pred = self.info_dict.get("fathmm-MKL_coding_pred")
-        #print(self.fathmm_mkl_coding_pred)
         # ClinVar aggregates information about genomic variation and its relationship to human health.
         # MutationAssessor score predicts the functional impact of amino-acid substitutions
         # in proteins based on evolutionary conservation of the affected amino acid in protein 
@@ -355,9 +367,6 @@ class Variant:
         else:
             self.gnomad_genome_all = float(self.info_dict.get("gnomAD_genome_ALL"))
 
-    def get_sample_values(self):
-        for sample in self.samples_stats.keys():
-            print(self.samples_stats.get())
 
 
 
@@ -407,7 +416,6 @@ def main():
                     trait = "heterozygous"
                 if sample0_gt == "1/1":
                     trait = "homozygous"
-                samples_stats = variant.get_sample_stats()
                 variants = variant.get_transcript_table_lines(args.name)
                 for v in variants:
                     if name:
