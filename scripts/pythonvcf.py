@@ -375,11 +375,13 @@ def main():
     parser.add_argument('-v', '--vcf', action='store', type=str, help="The vcf to be parsed", required=True)
     parser.add_argument('-n', '--name', action='store', type=str, help="The sample name", required=False, default=None)
     parser.add_argument('-f', '--first', action='store_true', help="Print only the first variant")
+    parser.add_argument('-t', '--no_header', action='store_true', help="Do not print the header")
     args = parser.parse_args()
 
     vcf = args.vcf
     name = args.name
     first = args.first
+    no_header = args.no_header
 
     vcf_exists = os.path.isfile(vcf)
     if vcf_exists == False:
@@ -398,7 +400,8 @@ def main():
                 sift_score\tsift_pred\tlof\tnmd\tmqranksum"
         if args.name:
             header = "sample_name" + "\t" + header
-        print(header)
+        if no_header != True:
+            print(header)
         for line in vcf_content:
             if type(line) is str:
                 pass
