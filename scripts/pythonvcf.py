@@ -368,6 +368,16 @@ class Variant:
             self.gnomad_genome_all = float(self.info_dict.get("gnomAD_genome_ALL"))
 
 
+def create_samples_columns_names(n):
+    s = "gt\tad\tdp\tref\talt\talternativefreq"
+    header = ""
+    for i in range(n):
+        #s = s + "\t" + s
+        if header == "":
+            header = s
+        else:
+            header +=  "\t" + s
+    return(header)
 
 
 def main():
@@ -376,12 +386,16 @@ def main():
     parser.add_argument('-n', '--name', action='store', type=str, help="The sample name", required=False, default=None)
     parser.add_argument('-f', '--first', action='store_true', help="Print only the first variant")
     parser.add_argument('-t', '--no_header', action='store_true', help="Do not print the header")
+    parser.add_argument('-s', '--samples', action='store', type=int, help="The number of samples (1 by default)", default=1)
     args = parser.parse_args()
 
     vcf = args.vcf
     name = args.name
     first = args.first
     no_header = args.no_header
+    number_of_samples = args.samples
+
+    samples_columns = create_samples_columns_names(number_of_samples)
 
     vcf_exists = os.path.isfile(vcf)
     if vcf_exists == False:
@@ -397,7 +411,7 @@ def main():
                 cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tgnomad_freq\t\
                 fathmm_pred\tfathmm_score\tfathmm_mkl_coding_score\tfathmm_mkl_coding_pred\t\
                 cadd_phred\tdann_score\tpolyphen2_hvar_score\tpolyphen2_hvar_pred\t\
-                sift_score\tsift_pred\tlof\tnmd\tmqranksum"
+                sift_score\tsift_pred\tlof\tnmd\tmqranksum" + "\t" + samples_columns
         if args.name:
             header = "sample_name" + "\t" + header
         if no_header != True:
