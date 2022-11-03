@@ -100,6 +100,16 @@ class Variant_from_clinvar(Variant):
             elif the_tuple[0] == "GENEINFO":
                 GENEINFO = the_tuple[1]
 
+        
+        if 'alleleid' not in locals():
+            sys.exit("Cound not find ALLELEID in the VCF")
+        if 'CLNDISDB' not in locals():
+            sys.exit("Cound not find CLNDISDB in the VCF")
+        if 'GENEINFO' not in locals():
+            sys.exit("Cound not find GENEINFO in the VCF")
+        if 'CLNSIG_list' not in locals():
+            sys.exit("Cound not find CLNSIG_list in the VCF")
+
         return alleleid,CLNDISDB,GENEINFO,CLNSIG_list
 
 
