@@ -40,7 +40,7 @@ class Variant:
 
         number_of_columns = len(splitted_line)
         # If there aren't enough columns
-        if number_of_columns < 10:
+        if number_of_columns < 8:
             sys.stderr.write("The number of fields is {} which is less than 10\n".format(number_of_columns))
             sys.exit(2)
 
@@ -56,6 +56,72 @@ class Variant:
             self.quality = splitted_line[5]
         self.filter = splitted_line[6]
         self.info = splitted_line[7]
+
+    def __str__(self):
+        return("Chromosome: {}\nPosition: {}".format(self.chromosome, self.position))
+
+    def __repr__(self):
+        return("Chromosome: {}\nPosition: {}".format(self.chromosome, self.position))
+
+
+class Variant_from_clinvar(Variant):
+    def __init__(self, vcf_line):
+        Variant.__init__(self, vcf_line)
+
+        info_tuple = self.__get_values_from_info()
+        self.alleleid,self.CLNDISDB,self.GENEINFO,self.CLNSIG = info_tuple
+
+    def __get_values_from_info(self):
+        CLNSIG_list = []
+        CLNDISDB = ""
+        GENEINFO = ""
+        splitted_info = self.info.split(";")
+        #d = {}
+        for el in splitted_info:
+            the_tuple = el.split("=")
+            # The ClinVar Allele ID
+            if the_tuple[0] == "ALLELEID":
+                alleleid = the_tuple[1]
+            elif the_tuple[0] == "CLNDISDB":
+                CLNDISDB = the_tuple[1]
+            # Clinical significance for this single variant
+            elif the_tuple[0] == "CLNSIG":
+                CLNSIG = the_tuple[1].split("|")
+                if len(CLNSIG) > 1:
+                    for CLNSIG_element in CLNSIG:
+                        if CLNSIG_element.startswith("_"):
+                            CLNSIG_element = CLNSIG_element[1:]
+                            CLNSIG_list.append(CLNSIG_element)
+                        else:
+                            CLNSIG_list.append(CLNSIG_element)
+                else:
+                    CLNSIG_list.append(CLNSIG[0])
+            # Gene(s) for the variant reported as gene symbol:gene id. The gene symbol and id are delimited by a colon (:) and each pair is delimited by a vertical bar (|)
+            elif the_tuple[0] == "GENEINFO":
+                GENEINFO = the_tuple[1]
+
+        return alleleid,CLNDISDB,GENEINFO,CLNSIG_list
+
+
+    def __str__(self):
+        return("{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome, self.position, self.reference, self.alternative, self.GENEINFO, "/".join(self.CLNSIG)))
+
+    def __repr__(self):
+        return("{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome, self.position, self.reference, self.alternative, self.GENEINFO, self.CLNSIG.join("/")))
+
+
+class Variant_with_genotype(Variant):
+    def __init__(self, vcf_line):
+        Variant.__init__(self, vcf_line)
+
+        splitted_line = vcf_line.split()
+
+        number_of_columns = len(splitted_line)
+        # If there aren't enough columns
+        if number_of_columns < 10:
+            sys.stderr.write("The number of fields is {} which is less than 10\n".format(number_of_columns))
+            sys.exit(2)
+
         self.format = splitted_line[8]
 
         sample_positions = range(9,number_of_columns)
@@ -125,12 +191,6 @@ class Variant:
         except:
             self.snpeff_transcipt_list = []
 
-
-    def __str__(self):
-        return("Chromosome: {}\nPosition: {}".format(self.chromosome, self.position))
-
-    def __repr__(self):
-        return("Chromosome: {}\nPosition: {}".format(self.chromosome, self.position))
 
     def __build_samples_stats(self):
         format_keys = self.format.split(":")
@@ -422,7 +482,7 @@ def main():
             else:
                 line = line.decode('UTF-8')
             if line[0] != '#':
-                variant = Variant(line)
+                variant = Variant_with_genotype(line)
 
                 if 'LRT_pred' not in variant.info_dict:
                     LRT_pred = '.'
