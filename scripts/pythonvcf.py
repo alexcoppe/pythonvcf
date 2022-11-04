@@ -69,12 +69,14 @@ class Variant_from_clinvar(Variant):
         Variant.__init__(self, vcf_line)
 
         info_tuple = self.__get_values_from_info()
-        self.alleleid,self.CLNDISDB,self.GENEINFO,self.CLNSIG = info_tuple
+        self.alleleid,self.CLNDISDB,self.GENEINFO,self.CLNSIG,self.CLNREVSTAT = info_tuple
 
     def __get_values_from_info(self):
         CLNSIG_list = []
+        CLNREVSTAT_list = []
         CLNDISDB = ""
         GENEINFO = ""
+        CLNREVSTAT = ""
         splitted_info = self.info.split(";")
         #d = {}
         for el in splitted_info:
@@ -84,6 +86,18 @@ class Variant_from_clinvar(Variant):
                 alleleid = the_tuple[1]
             elif the_tuple[0] == "CLNDISDB":
                 CLNDISDB = the_tuple[1]
+            elif the_tuple[0] == "CLNREVSTAT":
+                CLNREVSTAT = the_tuple[1].split(",")
+                if len(CLNREVSTAT) > 1:
+                    for CLNREVSTAT_element in CLNREVSTAT:
+                        if CLNREVSTAT_element.startswith("_"):
+                            CLNREVSTAT_element = CLNREVSTAT_element[1:]
+                            CLNREVSTAT_list.append(CLNREVSTAT_element)
+                        else:
+                            CLNREVSTAT_list.append(CLNREVSTAT_element)
+                    CLNREVSTAT = ",".join(CLNREVSTAT_list)
+                else:
+                    CLNREVSTAT = CLNREVSTAT[0]
             # Clinical significance for this single variant
             elif the_tuple[0] == "CLNSIG":
                 CLNSIG = the_tuple[1].split("|")
@@ -109,15 +123,17 @@ class Variant_from_clinvar(Variant):
             sys.exit("Cound not find GENEINFO in the VCF")
         if 'CLNSIG_list' not in locals():
             sys.exit("Cound not find CLNSIG_list in the VCF")
+        if 'CLNREVSTAT' not in locals():
+            sys.exit("Cound not find CLNREVSTAT in the VCF")
 
-        return alleleid,CLNDISDB,GENEINFO,CLNSIG_list
+        return alleleid,CLNDISDB,GENEINFO,CLNSIG_list,CLNREVSTAT
 
 
     def __str__(self):
-        return("{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome, self.position, self.reference, self.alternative, self.GENEINFO, "/".join(self.CLNSIG)))
+        return("{}\t{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome, self.position, self.reference, self.alternative, self.GENEINFO, "/".join(self.CLNSIG), self.CLNREVSTAT))
 
     def __repr__(self):
-        return("{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome, self.position, self.reference, self.alternative, self.GENEINFO, self.CLNSIG.join("/")))
+        return("{}\t{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome, self.position, self.reference, self.alternative, self.GENEINFO, "/".join(self.CLNSIG), self.CLNREVSTAT))
 
 
 class Variant_with_genotype(Variant):
