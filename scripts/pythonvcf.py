@@ -4,6 +4,7 @@ import argparse
 import gzip
 import os
 import sys
+import re
 
 class Sneff_transcript:
     def __init__(self, ann):
@@ -63,6 +64,29 @@ class Variant:
     def __repr__(self):
         return("Chromosome: {}\nPosition: {}".format(self.chromosome, self.position))
 
+    # Calculate the Review status in ClinVar (gold stars)
+    # Descrition web-page: https://www.ncbi.nlm.nih.gov/clinvar/docs/review_status/
+    def calculate_clinvar_review_status(self):
+        """
+        Description 
+        -----------
+            Calculate the Review status in clinvar (gold stars)
+            Descrition web-page: https://www.ncbi.nlm.nih.gov/clinvar/docs/review_status/
+        """
+        reg_exp_to_match = "CLNREVSTAT=.+?;"
+        match = re.search("CLNREVSTAT=.+?;", self.info)
+        if match:
+            match = self.info[match.start():match.end()]
+            if "single" in match or "conflicting" in match:
+                return 1
+            elif "multiple" in match:
+                return 2
+            elif "expert" in match:
+                return 3
+            elif "practice" in match:
+                return 4
+            else:
+                return 0
 
 class Variant_from_clinvar(Variant):
     def __init__(self, vcf_line):
@@ -86,6 +110,7 @@ class Variant_from_clinvar(Variant):
                 alleleid = the_tuple[1]
             elif the_tuple[0] == "CLNDISDB":
                 CLNDISDB = the_tuple[1]
+            # ClinVar review status for the Variation ID
             elif the_tuple[0] == "CLNREVSTAT":
                 CLNREVSTAT = the_tuple[1].split(",")
                 if len(CLNREVSTAT) > 1:
@@ -323,8 +348,15 @@ class Variant_with_genotype(Variant):
         if "recessive" in clndn: type_of_mutation = "recessive"
         if "dominant" in clndn: type_of_mutation = "dominant"
 
-        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
-                clndn, type_of_mutation, self.clnsig, self.gnomad_genome_all, self.fathmm_pred,
+        if 'CLNREVSTAT' not in self.info_dict:
+            CLNREVSTAT = '.'
+            clinvar_review_status = "."
+        else:
+            clnrevstat = self.info_dict["CLNREVSTAT"]
+            clinvar_review_status = self.calculate_clinvar_review_status()
+
+        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+                clndn, type_of_mutation, self.clnsig, clinvar_review_status, self.gnomad_genome_all, self.fathmm_pred,
                 self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred, self.dann_score,
                 self.polyphen2_hvar_score, self.polyphen2_hvar_pred, self.sift_score, self.sift_pred,
                 self.lof, self.nmd, self.mqranksum)
@@ -494,7 +526,7 @@ def main():
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
         header = "chromosome\tposition\tidentifier\treference\talternative\tfilter\t\
                 effect\timpact\tgene\tgene_id\tbiotype\thgvs_c\thgvs_p\tcdna_pos\t\
-                cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tgnomad_freq\t\
+                cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tclinvar_review_status\tgnomad_freq\t\
                 fathmm_pred\tfathmm_score\tfathmm_mkl_coding_score\tfathmm_mkl_coding_pred\t\
                 cadd_phred\tdann_score\tpolyphen2_hvar_score\tpolyphen2_hvar_pred\t\
                 sift_score\tsift_pred\tlof\tnmd\tmqranksum" + "\t" + samples_columns
