@@ -15,7 +15,6 @@ def main():
     vcf = args.vcf
     index = args.index
     i = 1
-    print(index)
 
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
         for line in vcf_content:
