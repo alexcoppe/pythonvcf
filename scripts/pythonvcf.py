@@ -93,7 +93,7 @@ class Variant_from_clinvar(Variant):
         Variant.__init__(self, vcf_line)
 
         info_tuple = self.__get_values_from_info()
-        self.alleleid,self.CLNDISDB,self.GENEINFO,self.CLNSIG,self.CLNREVSTAT = info_tuple
+        self.alleleid,self.CLNDISDB,self.GENEINFO,self.CLNSIG,self.CLNREVSTAT,self.CLNDN = info_tuple
 
     def __get_values_from_info(self):
         CLNSIG_list = []
@@ -138,6 +138,9 @@ class Variant_from_clinvar(Variant):
             # Gene(s) for the variant reported as gene symbol:gene id. The gene symbol and id are delimited by a colon (:) and each pair is delimited by a vertical bar (|)
             elif the_tuple[0] == "GENEINFO":
                 GENEINFO = the_tuple[1]
+            elif the_tuple[0] == "CLNDN":
+                CLNDN = the_tuple[1]
+
 
         
         if 'alleleid' not in locals():
@@ -150,15 +153,18 @@ class Variant_from_clinvar(Variant):
             sys.exit("Cound not find CLNSIG_list in the VCF")
         if 'CLNREVSTAT' not in locals():
             sys.exit("Cound not find CLNREVSTAT in the VCF")
+        if 'CLNDN' not in locals():
+            CLNDN = '.'
+            #sys.exit("Cound not find CLNDN in the VCF")
 
-        return alleleid,CLNDISDB,GENEINFO,CLNSIG_list,CLNREVSTAT
+        return alleleid,CLNDISDB,GENEINFO,CLNSIG_list,CLNREVSTAT,CLNDN
 
 
     def __str__(self):
-        return("{}\t{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome, self.position, self.reference, self.alternative, self.GENEINFO, "/".join(self.CLNSIG), self.CLNREVSTAT))
+        return("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome, self.position, self.reference, self.alternative, self.GENEINFO, "/".join(self.CLNSIG), self.CLNREVSTAT, self.CLNDISDB, self.CLNDN))
 
     def __repr__(self):
-        return("{}\t{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome, self.position, self.reference, self.alternative, self.GENEINFO, "/".join(self.CLNSIG), self.CLNREVSTAT))
+        return("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome, self.position, self.reference, self.alternative, self.GENEINFO, "/".join(self.CLNSIG), self.CLNREVSTAT, self.CLNDISDB, self.CLNDN))
 
 
 class Variant_with_genotype(Variant):
