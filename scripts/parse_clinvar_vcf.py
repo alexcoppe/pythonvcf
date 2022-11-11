@@ -23,6 +23,8 @@ def main():
             else:
                 line = line.decode('UTF-8')
             if line[0] != '#':
+                if "\"" in line:
+                    line = line.replace("\"", "")
                 variant = pythonvcf.Variant_from_clinvar(line)
                 if index == True:
                     print("{}\t{}".format(i, variant))
