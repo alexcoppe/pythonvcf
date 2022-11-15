@@ -59,7 +59,6 @@ def main():
             if line[0] != '#':
                 match = re.search("CLNSIG=.+?;", line)
                 if match:
-                    #print(match)
                     variant = pythonvcf.Variant_with_genotype(line)
                     chromosome_in_variant = variant.chromosome
                     position_in_variant = variant.position
@@ -67,10 +66,9 @@ def main():
                     reference_in_variant = variant.reference
                     clnsig = line[int(match.start()):int(match.end())]
                     clnsig_value = clnsig[:-1].split("=")[1]
-                    #print(clnsig_value)
 
                     cur = conn.cursor()
-                    query = "SELECT * FROM CLINVAR WHERE CHR == {} AND POSITION == {} AND ALTERNATIVE == '{}' AND REFERENCE == '{}' LIMIT 1;".format(chromosome_in_variant[3:], position_in_variant, alternative_in_variant, reference_in_variant)
+                    query = "SELECT * FROM CLINVAR WHERE CHR == '{}' AND POSITION == {} AND ALTERNATIVE == '{}' AND REFERENCE == '{}' LIMIT 2;".format(chromosome_in_variant[3:], position_in_variant, alternative_in_variant, reference_in_variant)
                     cur.execute(query)
                     rows = cur.fetchall()
 
