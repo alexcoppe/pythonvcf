@@ -27,9 +27,9 @@ def main():
                     line = line.replace("\"", "")
                 variant = pythonvcf.Variant_from_clinvar(line)
                 if index == True:
-                    print("{}\t{}".format(i, variant))
+                    print("{}\t{}\t{}".format(i, variant, variant.get_clinvar_stars()))
                 else:
-                    print(variant)
+                    print("{}\t{}".format(variant, variant.get_clinvar_stars()))
                 i += 1
 
 if __name__ == "__main__":

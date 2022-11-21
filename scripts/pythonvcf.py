@@ -95,6 +95,9 @@ class Variant_from_clinvar(Variant):
         info_tuple = self.__get_values_from_info()
         self.alleleid,self.CLNDISDB,self.GENEINFO,self.CLNSIG,self.CLNREVSTAT,self.CLNDN = info_tuple
 
+    def get_clinvar_stars(self):
+        print("Done")
+
     def __get_values_from_info(self):
         CLNSIG_list = []
         CLNREVSTAT_list = []
@@ -158,6 +161,49 @@ class Variant_from_clinvar(Variant):
             #sys.exit("Cound not find CLNDN in the VCF")
 
         return alleleid,CLNDISDB,GENEINFO,CLNSIG_list,CLNREVSTAT,CLNDN
+
+    
+    def get_clinvar_stars(self):
+        """Calculate the stars in Clinvar from the CLNREVSTAT property
+
+
+        four|practice guideline|practice guideline
+
+        three|reviewed by expert panel|reviewed by expert panel
+
+        two|criteria provided, multiple submitters, no conflicts|Two or more submitters with assertion criteria and evidence (or a public contact) provided the same interpretation.
+
+        one|criteria provided, conflicting interpretations|Multiple submitters provided assertion criteria and evidence (or a public contact) but there are conflicting interpretations. The independent values are enumerated for clinical significance.
+
+        one|criteria provided, single submitter|One submitter provided an interpretation with assertion criteria and evidence (or a public contact).
+
+        none|no assertion for the individual variant|The allele was not interpreted directly in any submission; it was submitted to ClinVar only as a component of a haplotype or a genotype.
+
+        none|no assertion criteria provided|The allele was included in a submission with an interpretation but without assertion criteria and evidence (or a public contact).
+
+        none|no assertion provided|The allele was included in a submission that did not provide an interpretation.
+        Parameters
+        ----------
+        sample : self
+
+        Returns
+        -------
+        int
+            Calculates the stars in Clinvar from the CLNREVSTAT property
+        """
+
+        if "no_assertion" in self.CLNREVSTAT:
+            return 0
+        elif "single_submitter" in self.CLNREVSTAT or "conflicting" in self.CLNREVSTAT:
+            return 1
+        elif "multiple" in self.CLNREVSTAT:
+            return 2
+        elif "reviewed" in self.CLNREVSTAT:
+            return 3
+        elif "practice_guideline" in self.CLNREVSTAT:
+            return 4
+        else:
+            return -1
 
 
     def __str__(self):
