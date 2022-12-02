@@ -407,8 +407,8 @@ class Variant_with_genotype(Variant):
             clnrevstat = self.info_dict["CLNREVSTAT"]
             clinvar_review_status = self.calculate_clinvar_review_status()
 
-        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
-                clndn, type_of_mutation, self.clnsig, clinvar_review_status, self.gnomad_genome_all, self.fathmm_pred,
+        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+                clndn, type_of_mutation, self.clnsig, clinvar_review_status, self.intervar_automated, self.gnomad_genome_all, self.fathmm_pred,
                 self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred, self.dann_score,
                 self.polyphen2_hvar_score, self.polyphen2_hvar_pred, self.sift_score, self.sift_pred,
                 self.lof, self.nmd, self.mqranksum)
@@ -531,6 +531,9 @@ class Variant_with_genotype(Variant):
 
         self.clnsig = self.info_dict.get("CLNSIG")
 
+        self.intervar_automated = self.info_dict.get("InterVar_automated")
+
+
     def _get_variant_gnomad_stats(self):
         if self.info_dict.get("gnomAD_genome_ALL", ".") == ".":
             self.gnomad_genome_all = 0
@@ -578,7 +581,8 @@ def main():
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
         header = "chromosome\tposition\tidentifier\treference\talternative\tfilter\t\
                 effect\timpact\tgene\tgene_id\tbiotype\thgvs_c\thgvs_p\tcdna_pos\t\
-                cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tclinvar_review_status\tgnomad_freq\t\
+                cds_pos\taa_pos\tCLNDN\ttype_of_mutation\tclnsig\tclinvar_review_status\t\
+                intervar_automated\tgnomad_freq\t\
                 fathmm_pred\tfathmm_score\tfathmm_mkl_coding_score\tfathmm_mkl_coding_pred\t\
                 cadd_phred\tdann_score\tpolyphen2_hvar_score\tpolyphen2_hvar_pred\t\
                 sift_score\tsift_pred\tlof\tnmd\tmqranksum" + "\t" + samples_columns
