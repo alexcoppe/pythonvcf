@@ -73,7 +73,7 @@ def main():
             else:
                 line = line.decode('UTF-8')
             if line[0] != '#':
-                if line.count('\t') < 9:
+                if line.count('\t') < 7:
                     sys.exit("{} is not a correct .VCF file".format(bed))
                 if "\"" in line:
                     line = line.replace("\"", "")
