@@ -19,6 +19,16 @@ def main():
 
     clinvar_db = {}
 
+    vcf_exists = os.path.isfile(vcf)
+    if vcf_exists == False:
+        sys.stderr.write("File {} do not exists\n".format(vcf))
+        sys.exit(2)
+
+    vcf_exists = os.path.isfile(clinvar_vcf)
+    if vcf_exists == False:
+        sys.stderr.write("File {} do not exists\n".format(vcf))
+        sys.exit(2)
+
     with (gzip.open if clinvar_vcf.endswith(".gz") else open)(clinvar_vcf) as vcf_content:
         for line in vcf_content:
             if type(line) is str:
