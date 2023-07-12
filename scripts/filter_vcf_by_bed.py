@@ -37,11 +37,11 @@ def get_ranges_from_bed(bed_path):
     return l
 
 def is_variant_in_ranges(variant, bed_ranges):
-    variant_chromosome = variant.chromosome
+    variant_chromosome = variant.chromosome.lower()
     if variant_chromosome.startswith("chr") or variant_chromosome.startswith("Chr") or variant_chromosome.startswith("CHR"):
-        variant_chromosome = variant_chromosome[3:].lower()
+        variant_chromosome = variant_chromosome[3:]
     for bed_range in bed_ranges:
-        if bed_range.chromosome ==  variant_chromosome:
+        if bed_range.chromosome.lower() ==  variant_chromosome:
             start = bed_range.start
             end = bed_range.end
             if variant.position > start and variant.position < end:
