@@ -28,6 +28,8 @@ def get_ranges_from_bed(bed_path):
             if number_of_tabs < 2 and number_of_spaces < 3:
                 return -1
             chromosome = splitted_line[0]
+            if chromosome.startswith("chr") or chromosome.startswith("Chr") or chromosome.startswith("CHR"):
+                chromosome = chromosome[3:].lower()
             start = int(splitted_line[1])
             end = int(splitted_line[2])
             genome_range = Genome_range(chromosome, start, end)
@@ -36,8 +38,8 @@ def get_ranges_from_bed(bed_path):
 
 def is_variant_in_ranges(variant, bed_ranges):
     variant_chromosome = variant.chromosome
-    if variant_chromosome.startswith("chr") or variant_chromosome.startswith("Chr"):
-        variant_chromosome = variant_chromosome[3:]
+    if variant_chromosome.startswith("chr") or variant_chromosome.startswith("Chr") or variant_chromosome.startswith("CHR"):
+        variant_chromosome = variant_chromosome[3:].lower()
     for bed_range in bed_ranges:
         if bed_range.chromosome ==  variant_chromosome:
             start = bed_range.start
