@@ -30,8 +30,14 @@ def get_ranges_from_bed(bed_path):
             chromosome = splitted_line[0]
             if chromosome.startswith("chr") or chromosome.startswith("Chr") or chromosome.startswith("CHR"):
                 chromosome = chromosome[3:].lower()
-            start = int(splitted_line[1])
-            end = int(splitted_line[2])
+            try:
+                start = int(splitted_line[1])
+            except ValueError:
+                return -1
+            try:
+                end = int(splitted_line[2])
+            except ValueError:
+                return -2
             genome_range = Genome_range(chromosome, start, end)
             l.append(genome_range)
     return l
@@ -64,6 +70,11 @@ def main():
         sys.exit("{} .BED file do not exists".format(bed))
     
     bed_ranges = get_ranges_from_bed(bed)
+    if bed_ranges == -1:
+        sys.exit("The BED file {} has a start position that is not a number".format(bed))
+
+    if bed_ranges == -2:
+        sys.exit("The BED file {} has an end position that is not a number".format(bed))
 
     if bed_ranges == -1:
         sys.exit("{} is not a correct .BED file".format(bed))
