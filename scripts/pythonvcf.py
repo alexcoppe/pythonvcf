@@ -113,6 +113,8 @@ class Variant:
         self.nmd = None
         # Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities
         self.mqranksum = None
+        # The Alternative Frequence (AF) from gnomeAD with ANNOVAR
+        self.af = None
 
         self._get_variant_effects()
 
@@ -211,6 +213,10 @@ class Variant:
         if self.nmd != None:
             self.nmd = self.nmd[1:len(self.nmd)][:-1].split("|")[-1]
         self.mqranksum = self.info_dict.get("MQRankSum")
+        # AF gnomad AF
+        self.af = self.info_dict.get("AF")
+        if self.af != None:
+            self.af = self.af
 
         self.clnsig = self.info_dict.get("CLNSIG")
 
@@ -250,11 +256,11 @@ class Variant:
             clnrevstat = self.info_dict["CLNREVSTAT"]
             clinvar_review_status = self.calculate_clinvar_review_status()
 
-        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+        more_info = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
                 clndn, type_of_mutation, self.clnsig, clinvar_review_status, self.intervar_automated, self.gnomad_genome_all, self.fathmm_pred,
                 self.fathmm_score, self.fathmm_mkl_coding_score, self.fathmm_mkl_coding_pred, self.cadd_phred, self.dann_score,
                 self.polyphen2_hvar_score, self.polyphen2_hvar_pred, self.sift_score, self.sift_pred,
-                self.lof, self.nmd, self.mqranksum)
+                self.lof, self.nmd, self.mqranksum, self.af)
 
         snpeff_transcipts = []
         if len(self.snpeff_transcipt_list) != 0:
@@ -611,7 +617,7 @@ def main():
                 intervar_automated\tgnomad_freq\t\
                 fathmm_pred\tfathmm_score\tfathmm_mkl_coding_score\tfathmm_mkl_coding_pred\t\
                 cadd_phred\tdann_score\tpolyphen2_hvar_score\tpolyphen2_hvar_pred\t\
-                sift_score\tsift_pred\tlof\tnmd\tmqranksum"
+                sift_score\tsift_pred\tlof\tnmd\tmqranksum\taf"
         if args.name:
             header = "sample_name" + "\t" + header
         for line in vcf_content:
