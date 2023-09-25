@@ -40,7 +40,6 @@ def main():
                 number_of_stars = variant.get_clinvar_stars()
                 clinvar_db[','.join([variant.chromosome, str(variant.position), variant.reference, variant.alternative])] = number_of_stars
 
-
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
         for line in vcf_content:
             if type(line) is str:

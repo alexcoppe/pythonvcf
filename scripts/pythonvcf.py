@@ -45,6 +45,7 @@ class Variant:
             sys.stderr.write("The number of fields is {} which is less than 10\n".format(number_of_columns))
             sys.exit(2)
 
+
         self.chromosome = splitted_line[0]
         self.position = int(splitted_line[1])
         self.identifier = splitted_line[2]
@@ -61,10 +62,10 @@ class Variant:
         self.info_dict = {}
         self.__build_info_dict()
 
-        #try:
-        self.snpeff_transcipt_list = self._get_snpeff_transcripts(self.info_dict.get("ANN"))
-        #except:
-            #self.snpeff_transcipt_list = []
+        try:
+            self.snpeff_transcipt_list = self._get_snpeff_transcripts(self.info_dict.get("ANN"))
+        except:
+            self.snpeff_transcipt_list = []
 
 
         # ClinVar aggregates information about genomic variation and its relationship to human health.
@@ -122,11 +123,6 @@ class Variant:
 
         self._get_variant_gnomad_stats()
 
-
-
-
-
- 
 
 
     def __str__(self):
