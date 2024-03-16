@@ -24,29 +24,29 @@ class Sneff_transcript:
     def __init__(self, ann):
         splitted_ann = ann.split("|")
         self.allele = splitted_ann[0]
-        self.effect = splitted_ann[1]
-        self.impact = splitted_ann[2]
-        self.gene = splitted_ann[3]
-        self.geneid = splitted_ann[4]
-        self.feature = splitted_ann[5]
-        self.featureid = splitted_ann[6]
-        self.biotype = splitted_ann[7]
+        self.annotation = splitted_ann[1]
+        self.putative_impact = splitted_ann[2]
+        self.gene_name = splitted_ann[3]
+        self.gene_id = splitted_ann[4]
+        self.feature_type = splitted_ann[5]
+        self.feature_id = splitted_ann[6]
+        self.transcript_biotype = splitted_ann[7]
         self.rank = splitted_ann[8]
         # alias HGVS_DNA, CODON): Variant in HGVS (DNA) notation
         self.hgvs_c = splitted_ann[9]
         # (alias HGVS, HGVS_PROT, AA): Variant in HGVS (protein) notation
         self.hgvs_p = splitted_ann[10]
-        self.cdna_pos = splitted_ann[11]
-        self.cdna_len = splitted_ann[12]
-        self.cds_pos = splitted_ann[13]
-        self.cds_len = splitted_ann[14]
-        self.aa_pos = splitted_ann[15]
+        self.cdna_position = splitted_ann[11]
+        self.cds_position = splitted_ann[12]
+        self.protein_position = splitted_ann[13]
+        self.distance_to_feature = splitted_ann[14]
+        self.errors = splitted_ann[15]
 
     def __str__(self):
-        return "Effect: {} Impact: {} Gene: {}".format(self.effect,self.impact,self.gene)
+        return "Effect: {} Impact: {} Gene: {}".format(self.effect,self.putative_impact,self.gene)
 
     def __repr__(self):
-        return "Effect: {} Impact: {} Gene: {}".format(self.effect,self.impact,self.gene)
+        return "Effect: {} Impact: {} Gene: {}".format(self.effect,self.putative_impact,self.gene)
 
 
 class Variant:
@@ -222,40 +222,40 @@ def main():
                                 for transcript in variant.snpeff_transcipt_list:
                                     l[i] = l[i] + transcript.allele + "\t"
                                     i += 1
-                            if wf == "effect":
+                            if wf == "annotation":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.effect + "\t"
+                                    l[i] = l[i] + transcript.annotation + "\t"
                                     i += 1
-                            if wf == "impact":
+                            if wf == "putative_impact":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.impact + "\t"
+                                    l[i] = l[i] + transcript.putative_impact + "\t"
                                     i += 1
-                            if wf == "gene":
+                            if wf == "gene_name":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.gene + "\t"
+                                    l[i] = l[i] + transcript.gene_name + "\t"
                                     i += 1
-                            if wf == "geneid":
+                            if wf == "gene_id":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.geneid + "\t"
+                                    l[i] = l[i] + transcript.gene_id + "\t"
                                     i += 1
-                            if wf == "feature":
+                            if wf == "feature_id":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.feature + "\t"
+                                    l[i] = l[i] + transcript.feature_id + "\t"
                                     i += 1
-                            if wf == "featureid":
+                            if wf == "feature_type":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.featureid + "\t"
+                                    l[i] = l[i] + transcript.feature_type + "\t"
                                     i += 1
-                            if wf == "biotype":
+                            if wf == "transcript_biotype":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.biotype + "\t"
+                                    l[i] = l[i] + transcript.transcript_biotype + "\t"
                                     i += 1
                             if wf == "rank":
                                 i = 0
@@ -272,30 +272,35 @@ def main():
                                 for transcript in variant.snpeff_transcipt_list:
                                     l[i] = l[i] + transcript.hgvs_p + "\t"
                                     i += 1
-                            if wf == "cdna_pos":
+                            if wf == "cdna_position":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.cdna_pos + "\t"
+                                    l[i] = l[i] + transcript.cdna_position + "\t"
                                     i += 1
                             if wf == "cdna_len":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
                                     l[i] = l[i] + transcript.cdna_len + "\t"
                                     i += 1
-                            if wf == "cds_pos":
+                            if wf == "cds_position":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.cds_pos + "\t"
+                                    l[i] = l[i] + transcript.cds_position + "\t"
                                     i += 1
-                            if wf == "cds_len":
+                            if wf == "protein_position":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.cds_len + "\t"
+                                    l[i] = l[i] + transcript.protein_position + "\t"
                                     i += 1
-                            if wf == "aa_pos":
+                            if wf == "distance_to_feature":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.aa_pos + "\t"
+                                    l[i] = l[i] + transcript.distance_to_feature + "\t"
+                                    i += 1
+                            if wf == "errors":
+                                i = 0
+                                for transcript in variant.snpeff_transcipt_list:
+                                    l[i] = l[i] + transcript.errors + "\t"
                                     i += 1
                         elif ';' in wanted_field:
                             wf = wanted_field.split(';')[1]
