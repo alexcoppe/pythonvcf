@@ -315,7 +315,7 @@ def main():
                                 value = dictionary.get(wf)
                                 s = s + value  + "\t"
                             for i in range(0,number_of_snpeff):
-                                l[i] = l[i] + s + "\t" 
+                                l[i] = l[i] + s
                         else:
                             wf = wanted_field
                             if wf == "position":
