@@ -167,13 +167,31 @@ class Variant:
                     self.info_dict[splitted_sub_info[0]] = splitted_sub_info[1]
 
 
-
     def __str__(self):
-        return("Chromosome: {}\nPosition: {}".format(self.chromosome, self.position))
+        return (
+            f"Chromosome: {self.chromosome}\n"
+            f"Position: {self.position}\n"
+            f"Identifier: {self.identifier}\n"
+            f"Reference: {self.reference}\n"
+            f"Alternative: {self.alternative}\n"
+            f"Quality: {self.quality}\n"
+            f"Filter: {self.filter}\n"
+            f"Info: {self.info}\n"
+            f"Samples: {self.samples}\n"
+        )
 
     def __repr__(self):
-        return("Chromosome: {}\nPosition: {}".format(self.chromosome, self.position))
-
+        return (
+            f"Chromosome: {self.chromosome}\n"
+            f"Position: {self.position}\n"
+            f"Identifier: {self.identifier}\n"
+            f"Reference: {self.reference}"
+            f"Alternative: {self.alternative}\n"
+            f"Quality: {self.quality}\n"
+            f"Filter: {self.filter}\n"
+            f"Info: {self.info}\n"
+            f"Samples: {self.samples}\n"
+        )
 
 
 def main():
@@ -214,38 +232,57 @@ def main():
                         l.append("")
 
                     for wanted_field in wanted_fields:
-                        if ':' in wanted_field:
-                            wf = wanted_field.split(':')[1]
-
+                        if wanted_field[0] == "#":
+                            continue
+                        if wanted_field.startswith("snpeff.ann."):
+                            wf = wanted_field.removeprefix("snpeff.ann.")
                             if wf == "allele":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.allele + "\t"
+                                    if transcript == "":
+                                        l[i] = l[i] + "NA" + "\t" 
+                                    else:
+                                        l[i] = l[i] + str(transcript.allele)  + "\t" 
                                     i += 1
                             if wf == "annotation":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.annotation + "\t"
+                                    if transcript.annotation == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:
+                                        l[i] = l[i] + transcript.annotation + "\t"
                                     i += 1
                             if wf == "putative_impact":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.putative_impact + "\t"
+                                    if transcript  == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:
+                                        l[i] = l[i] + transcript.putative_impact + "\t"
                                     i += 1
                             if wf == "gene_name":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.gene_name + "\t"
+                                    if transcript  == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:
+                                        l[i] = l[i] + transcript.gene_name + "\t"
                                     i += 1
                             if wf == "gene_id":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.gene_id + "\t"
+                                    if transcript.gene_id  == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:
+                                        l[i] = l[i] + transcript.gene_id + "\t"
                                     i += 1
                             if wf == "feature_id":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.feature_id + "\t"
+                                    if transcript.feature_id  == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:
+                                        l[i] = l[i] + transcript.feature_id + "\t"
                                     i += 1
                             if wf == "feature_type":
                                 i = 0
@@ -260,12 +297,18 @@ def main():
                             if wf == "rank":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.rank + "\t"
-                                    i += 1
+                                    if transcript.rank == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:  
+                                        l[i] = l[i] + transcript.rank + "\t"
+                                        i += 1
                             if wf == "hgvs_c":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.hgvs_c + "\t"
+                                    if transcript.hgvs_c == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:  
+                                        l[i] = l[i] + transcript.hgvs_c + "\t"
                                     i += 1
                             if wf == "hgvs_p":
                                 i = 0
@@ -305,8 +348,10 @@ def main():
                         elif ';' in wanted_field:
                             wf = wanted_field.split(';')[1]
                             for i in range(0,number_of_snpeff):
-                                l[i] = l[i] + str(variant.info_dict[wf])  + "\t" 
-
+                                try:
+                                    l[i] = l[i] + str(variant.info_dict[wf])  + "\t" 
+                                except:
+                                    l[i] = l[i] + "NA" + "\t" 
                         elif '|' in wanted_field:
                             wf = wanted_field.split('|')[1]
                             s = ""
