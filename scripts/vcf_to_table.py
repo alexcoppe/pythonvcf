@@ -36,9 +36,12 @@ class Sneff_transcript:
         self.hgvs_c = splitted_ann[9]
         # (alias HGVS, HGVS_PROT, AA): Variant in HGVS (protein) notation
         self.hgvs_p = splitted_ann[10]
-        self.cdna_position = splitted_ann[11]
-        self.cds_position = splitted_ann[12]
-        self.protein_position = splitted_ann[13]
+        self.cdna_position = splitted_ann[11].split("/")[0]
+        self.cdna_len = splitted_ann[11].split("/")[1]
+        self.cds_position = splitted_ann[12].split("/")[0]
+        self.cds_len = splitted_ann[12].split("/")[1]
+        self.protein_position = splitted_ann[13].split("/")[0]
+        self.protein_len = splitted_ann[13].split("/")[1]
         self.distance_to_feature = splitted_ann[14]
         self.errors = splitted_ann[15]
 
@@ -287,12 +290,18 @@ def main():
                             if wf == "feature_type":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.feature_type + "\t"
+                                    if transcript.feature_type  == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:
+                                        l[i] = l[i] + transcript.feature_type + "\t"
                                     i += 1
                             if wf == "transcript_biotype":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.transcript_biotype + "\t"
+                                    if transcript.transcript_biotype  == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:
+                                        l[i] = l[i] + transcript.transcript_biotype + "\t"
                                     i += 1
                             if wf == "rank":
                                 i = 0
@@ -318,32 +327,66 @@ def main():
                             if wf == "cdna_position":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.cdna_position + "\t"
+                                    if transcript.cdna_position == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:  
+                                        l[i] = l[i] + transcript.cdna_position + "\t"
                                     i += 1
                             if wf == "cdna_len":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.cdna_len + "\t"
+                                    if transcript.cdna_len == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:  
+                                        l[i] = l[i] + transcript.cdna_len + "\t"
                                     i += 1
                             if wf == "cds_position":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.cds_position + "\t"
+                                    if transcript.cds_position == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:  
+                                        l[i] = l[i] + transcript.cds_position + "\t"
+                                    i += 1
+                            if wf == "cds_len":
+                                i = 0
+                                for transcript in variant.snpeff_transcipt_list:
+                                    if transcript.cds_len == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:  
+                                        l[i] = l[i] + transcript.cds_len + "\t"
                                     i += 1
                             if wf == "protein_position":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.protein_position + "\t"
+                                    if transcript.protein_position == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:  
+                                        l[i] = l[i] + transcript.protein_position + "\t"
+                                    i += 1
+                            if wf == "protein_len":
+                                i = 0
+                                for transcript in variant.snpeff_transcipt_list:
+                                    if transcript.protein_len == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:  
+                                        l[i] = l[i] + transcript.protein_len + "\t"
                                     i += 1
                             if wf == "distance_to_feature":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.distance_to_feature + "\t"
+                                    if transcript.distance_to_feature == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:  
+                                        l[i] = l[i] + transcript.distance_to_feature + "\t"
                                     i += 1
                             if wf == "errors":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.errors + "\t"
+                                    if transcript.errors == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:  
+                                        l[i] = l[i] + transcript.errors + "\t"
                                     i += 1
                         elif ';' in wanted_field:
                             wf = wanted_field.split(';')[1]
