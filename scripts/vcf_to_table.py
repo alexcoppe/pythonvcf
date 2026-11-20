@@ -36,20 +36,23 @@ class Sneff_transcript:
         self.hgvs_c = splitted_ann[9]
         # (alias HGVS, HGVS_PROT, AA): Variant in HGVS (protein) notation
         self.hgvs_p = splitted_ann[10]
-        self.cdna_position = splitted_ann[11].split("/")[0]
-        self.cdna_len = splitted_ann[11].split("/")[1]
-        self.cds_position = splitted_ann[12].split("/")[0]
-        self.cds_len = splitted_ann[12].split("/")[1]
-        self.protein_position = splitted_ann[13].split("/")[0]
-        self.protein_len = splitted_ann[13].split("/")[1]
+        cdna = splitted_ann[11].split("/")
+        self.cdna_position = cdna[0]
+        self.cdna_len = cdna[1] if len(cdna) > 1 else ""
+        cds = splitted_ann[12].split("/")
+        self.cds_position = cds[0]
+        self.cds_len = cds[1] if len(cds) > 1 else ""
+        protein = splitted_ann[13].split("/")
+        self.protein_position = protein[0]
+        self.protein_len = protein[1] if len(protein) > 1 else ""
         self.distance_to_feature = splitted_ann[14]
         self.errors = splitted_ann[15]
 
     def __str__(self):
-        return "Effect: {} Impact: {} Gene: {}".format(self.effect,self.putative_impact,self.gene)
+        return "Effect: {} Impact: {} Gene: {}".format(self.annotation,self.putative_impact,self.gene_name)
 
     def __repr__(self):
-        return "Effect: {} Impact: {} Gene: {}".format(self.effect,self.putative_impact,self.gene)
+        return "Effect: {} Impact: {} Gene: {}".format(self.annotation,self.putative_impact,self.gene_name)
 
 
 class Variant:
@@ -113,7 +116,7 @@ class Variant:
         self.__build_info_dict()
 
         try:
-            self.snpeff_transcipt_list = self.__get_snpeff_transcripts(self.info_dict.get("ANN"))
+            self.snpeff_transcipt_list = self.__get_snpeff_transcripts(self.info_dict.get("ann"))
         except:
             self.snpeff_transcipt_list = []
 
@@ -127,10 +130,11 @@ class Variant:
         format_elements = self.splitted_line[8].split(':')
         for i in range(9,number_of_elements_from_split):
             splitted_sample = self.splitted_line[i].split(':')
+            if len(splitted_sample) < len(format_elements):
+                splitted_sample = splitted_sample + ["NA"] * (len(format_elements) - len(splitted_sample))
             if len(splitted_sample) != len(format_elements):
-                print("Error")
+                sys.exit("Error: the number of fields in FORMAT and sample")
             else:
-                splitted_sample = self.splitted_line[i].split(':')
                 d = {}
                 i = 0
                 for key in format_elements:
@@ -161,14 +165,15 @@ class Variant:
         splitted_info = self.info.split(";")
         for sub_info in splitted_info:
             splitted_sub_info = sub_info.split("=")
+
+
             if len(splitted_sub_info) == 2:
                 if splitted_sub_info[1].isnumeric():
-                    self.info_dict[splitted_sub_info[0]] = int(splitted_sub_info[1])
+                    self.info_dict[splitted_sub_info[0].lower()] = int(splitted_sub_info[1])
                 elif splitted_sub_info[1].replace(".", "").isnumeric():
-                    self.info_dict[splitted_sub_info[0]] = float(splitted_sub_info[1])
+                    self.info_dict[splitted_sub_info[0].lower()] = float(splitted_sub_info[1])
                 else:
-                    self.info_dict[splitted_sub_info[0]] = splitted_sub_info[1]
-
+                    self.info_dict[splitted_sub_info[0].lower()] = splitted_sub_info[1]
 
     def __str__(self):
         return (
@@ -188,7 +193,7 @@ class Variant:
             f"Chromosome: {self.chromosome}\n"
             f"Position: {self.position}\n"
             f"Identifier: {self.identifier}\n"
-            f"Reference: {self.reference}"
+            f"Reference: {self.reference}\n"
             f"Alternative: {self.alternative}\n"
             f"Quality: {self.quality}\n"
             f"Filter: {self.filter}\n"
@@ -215,7 +220,9 @@ def main():
     wanted_fields = []
     with (open(wanted_fields_file_name) as  wanted_fields_content):
         for line in wanted_fields_content:
-            wanted_fields.append(line[:-1])
+            line = line.strip()
+            if line != "":
+                wanted_fields.append(line)
 
     with (gzip.open if vcf.endswith(".gz") else open)(vcf) as vcf_content:
         for line in vcf_content:
@@ -229,6 +236,8 @@ def main():
                 if number_of_elements_in_line >= 8:
                     variant = Variant(line)
                     number_of_snpeff = len(variant.snpeff_transcipt_list)
+                    if number_of_snpeff == 0:
+                        number_of_snpeff = 1
                     s = ""
                     l = []
                     for transcript in range(0,number_of_snpeff):
@@ -238,11 +247,14 @@ def main():
                         if wanted_field[0] == "#":
                             continue
                         if wanted_field.startswith("snpeff.ann."):
+                            if len(variant.snpeff_transcipt_list) == 0:
+                                l[0] = l[0] + "NA" + "\t"
+                                continue
                             wf = wanted_field.removeprefix("snpeff.ann.")
                             if wf == "allele":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    if transcript == "":
+                                    if transcript.allele == "":
                                         l[i] = l[i] + "NA" + "\t" 
                                     else:
                                         l[i] = l[i] + str(transcript.allele)  + "\t" 
@@ -258,7 +270,7 @@ def main():
                             if wf == "putative_impact":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    if transcript  == "":
+                                    if transcript.putative_impact  == "":
                                         l[i] = l[i] + "NA" + "\t"
                                     else:
                                         l[i] = l[i] + transcript.putative_impact + "\t"
@@ -266,7 +278,7 @@ def main():
                             if wf == "gene_name":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    if transcript  == "":
+                                    if transcript.gene_name  == "":
                                         l[i] = l[i] + "NA" + "\t"
                                     else:
                                         l[i] = l[i] + transcript.gene_name + "\t"
@@ -310,7 +322,7 @@ def main():
                                         l[i] = l[i] + "NA" + "\t"
                                     else:  
                                         l[i] = l[i] + transcript.rank + "\t"
-                                        i += 1
+                                    i += 1
                             if wf == "hgvs_c":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
@@ -322,7 +334,10 @@ def main():
                             if wf == "hgvs_p":
                                 i = 0
                                 for transcript in variant.snpeff_transcipt_list:
-                                    l[i] = l[i] + transcript.hgvs_p + "\t"
+                                    if transcript.hgvs_p == "":
+                                        l[i] = l[i] + "NA" + "\t"
+                                    else:
+                                        l[i] = l[i] + transcript.hgvs_p + "\t"
                                     i += 1
                             if wf == "cdna_position":
                                 i = 0
@@ -388,19 +403,21 @@ def main():
                                     else:  
                                         l[i] = l[i] + transcript.errors + "\t"
                                     i += 1
-                        elif ';' in wanted_field:
-                            wf = wanted_field.split(';')[1]
+                        elif wanted_field.startswith("info."):
+                            wf = wanted_field.removeprefix("info.").lower()
                             for i in range(0,number_of_snpeff):
                                 try:
                                     l[i] = l[i] + str(variant.info_dict[wf])  + "\t" 
                                 except:
                                     l[i] = l[i] + "NA" + "\t" 
-                        elif '|' in wanted_field:
-                            wf = wanted_field.split('|')[1]
+                        elif wanted_field.startswith("samples."):
+                            wf = wanted_field.removeprefix("samples.")
                             s = ""
                             dff = 0
+                            if not variant.samples:
+                                s = s + "NA" + "\t"
                             for dictionary in variant.samples:
-                                value = dictionary.get(wf)
+                                value = dictionary.get(wf.upper(), "NA")
                                 s = s + value  + "\t"
                             for i in range(0,number_of_snpeff):
                                 l[i] = l[i] + s
